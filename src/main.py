@@ -64,7 +64,11 @@ def main():
         
         #frame = imutils.resize(frame, width = 600, height = 300)
         frame = cv2.flip(frame, 1)
+
+
         overlay = frame.copy()
+
+
         alpha = 0.5
         cv2.line(overlay,(150,0),(150,600),(138,138,138),1)
         cv2.addWeighted(overlay, alpha, frame, 1 - alpha,0, frame)

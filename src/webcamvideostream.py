@@ -1,6 +1,7 @@
 from threading import Thread
 import cv2
 
+
 class WebcamVideoStream:
     def __init__(self, src=0, name="WebcamVideoStream"):
         # initialize the video camera stream and read the first frame
