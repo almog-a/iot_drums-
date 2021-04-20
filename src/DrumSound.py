@@ -1,7 +1,7 @@
 from collections import deque
 import simpleaudio as sa
 import os
-#///
+#///----
 class DrumSound:
     def __init__ (self, pathToAudioFolder, name, numberOfSounds, audioExtention):
         self.pathToAudioFolder = pathToAudioFolder
