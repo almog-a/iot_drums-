@@ -1,9 +1,9 @@
 from collections import deque
-from webcamvideostream import WebcamVideoStream
-from DrumSound import DrumSound
+from src.webcamvideostream import WebcamVideoStream
+from src.DrumSound import DrumSound
 from imutils.video import FileVideoStream
 from imutils.video import FPS
-from Stick import Stick
+from src.Stick import Stick
 import os
 import numpy as np
 import argparse
@@ -11,7 +11,8 @@ import cv2
 import imutils
 import time
 import simpleaudio as sa
-
+import src.realsense_depth as rs
+##### taking care of imports
 #----------comment-----
 
 snare = DrumSound("../audio/", "Snare", 5, ".wav")
@@ -54,18 +55,22 @@ def main():
     objLower = (30, 86, 14)
     objUpper = (97, 244, 255)
     frameCount = 0
-    vs = WebcamVideoStream(src=0).start()
+    #vs1 = WebcamVideoStream(src=1).start()
+    vs = rs.DepthCamera()
+    vs.startStream()
 
     #vs = FileVideoStream(0).start()
     time.sleep(1.0)
     while True:
         # Read in 1 frame at a time and flip the image
-        frame = vs.read()
-        
+        is_captured, depth_frame, color_frame = vs.get_frame()
         #frame = imutils.resize(frame, width = 600, height = 300)
-        frame = cv2.flip(frame, 1)
-
-
+        depth_frame = cv2.flip(depth_frame, 1)
+        color_frame = cv2.flip(color_frame, 1)
+        frame = color_frame
+        #cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+        #cv2.imshow('RealSense', color_frame)
+        #cv2.waitKey(1)
         overlay = frame.copy()
 
 
