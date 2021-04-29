@@ -123,9 +123,9 @@ def main():
         frameCount += 1
     
         # if the 'q' key is pressed, stop the loop
-        if key == ord("q"):
+        if key == 27:
             break
-    vs.stop()
+    vs.release()
     cv2.destroyAllWindows()
 
 if __name__== "__main__":
