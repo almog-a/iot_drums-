@@ -30,15 +30,20 @@ class DepthCamera:
 
     def get_frame(self):
         frames = self.pipeline.wait_for_frames()
-        depth_frame = frames.get_depth_frame()
+        raw_depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
         colorizer = rs.colorizer()
-        depth_color_frame = colorizer.colorize(depth_frame)
+        depth_color_frame = colorizer.colorize(raw_depth_frame)
         depth_image = np.asanyarray(depth_color_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
-        if not depth_frame or not color_frame:
-            return False, None, None
-        return True, depth_image, color_image
+        raw_depth_image = np.asanyarray(raw_depth_frame.get_data())
+        if not raw_depth_frame or not color_frame:
+            return False, None, None, None
+        return True, depth_image, color_image, raw_depth_image
 
     def release(self):
         self.pipeline.stop()
+
+    def get_distance(self,x,y,depth_frame):
+        distance = depth_frame[y,x]
+        return distance

@@ -63,11 +63,12 @@ def main():
     time.sleep(1.0)
     while True:
         # Read in 1 frame at a time and flip the image
-        is_captured, depth_frame, color_frame = vs.get_frame()
+        is_captured, depth_frame, color_frame,raw_depth_frame = vs.get_frame()
         #frame = imutils.resize(frame, width = 600, height = 300)
         depth_frame = cv2.flip(depth_frame, 1)
         color_frame = cv2.flip(color_frame, 1)
         frame = color_frame
+        raw_depth_frame=cv2.flip(raw_depth_frame,1)
         #cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
         #cv2.imshow('RealSense', color_frame)
         #cv2.waitKey(1)
@@ -103,17 +104,24 @@ def main():
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(leftStick)
+                        distance=vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
+                        cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+                        #cv2.circle(frame, center[i], 10, (76,76,156), 3
+
                 else:
                     cv2.circle(frame, center[i], 10, (76,76,156), 3)
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
+
             # Only one stick - split screen in half
+
             else:
                 if(center[i][0]>= 300):
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(leftStick)
+
                 else: 
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
