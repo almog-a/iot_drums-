@@ -71,7 +71,7 @@ def main():
         #cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
         #cv2.imshow('RealSense', color_frame)
         #cv2.waitKey(1)
-        overlay = frame.copy()
+        overlay = color_frame.copy()
 
 
         alpha = 0.5
@@ -99,12 +99,12 @@ def main():
         for i in range(numSticks):
             if (numSticks > 1):
                 if (center[i][0] <= center[(i + 1) % 2][0]):
-                    cv2.circle(frame, center[i], 10, (156, 76, 76), 3) 
+                    cv2.circle(frame, center[i], 10, (156, 76, 76), 3)
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(leftStick)
                 else:
-                    cv2.circle(frame, center[i], 10, (76,76,156), 3) 
+                    cv2.circle(frame, center[i], 10, (76,76,156), 3)
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
@@ -118,7 +118,8 @@ def main():
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
-        cv2.imshow("Frame", frame)
+        cv2.imshow("Color Stream",frame)
+        cv2.imshow("Depth Strem", depth_frame)
         key = cv2.waitKey(1) & 0xFF
         frameCount += 1
     

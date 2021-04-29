@@ -1,6 +1,5 @@
 import pyrealsense2 as rs
 import numpy as np
-
 #--
 class DepthCamera:
     def __init__(self):
@@ -33,8 +32,9 @@ class DepthCamera:
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
-
-        depth_image = np.asanyarray(depth_frame.get_data())
+        colorizer = rs.colorizer()
+        depth_color_frame = colorizer.colorize(depth_frame)
+        depth_image = np.asanyarray(depth_color_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
         if not depth_frame or not color_frame:
             return False, None, None
