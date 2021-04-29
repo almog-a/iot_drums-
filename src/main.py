@@ -106,6 +106,7 @@ def main():
                         trackStick(leftStick)
                         distance=vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
                         cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+
                         #cv2.circle(frame, center[i], 10, (76,76,156), 3
 
                 else:
@@ -113,6 +114,8 @@ def main():
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
+                        distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
+                        cv2.putText(color_frame, "{}mm".format(distance), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
             # Only one stick - split screen in half
 
@@ -134,6 +137,7 @@ def main():
         # if the 'q' key is pressed, stop the loop
         if key == 27:
             break
+        vs.keyUI((key))
     vs.release()
     cv2.destroyAllWindows()
 
