@@ -32,6 +32,7 @@ class DepthCamera:
             frames = self.pipeline.wait_for_frames()
             depth_frame = frames.get_depth_frame()
             color_frame = frames.get_color_frame()
+
             if not depth_frame or not color_frame:
                 continue
             else:

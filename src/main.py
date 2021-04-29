@@ -43,14 +43,28 @@ def trackStick(stick):
     return 
 
 def playDrumByPosition(x, y, volume):
-    if (x < 150):
+
+    if (x < 360):
         kick.play(volume)
-    elif (x < 450):
+    elif (x < 360):
         snare.play(volume)
     else:
         hihat.play(volume)
 
 def main():
+    def mouseRGB(event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
+            colorsB = frame[y, x, 0]
+            colorsG = frame[y, x, 1]
+            colorsR = frame[y, x, 2]
+            colors = frame[y, x]
+            print("Red: ", colorsR)
+            print("Green: ", colorsG)
+            print("Blue: ", colorsB)
+            print("BGR Format: ", colors)
+            print("Coordinates of pixel: X: ", x, "Y: ", y)
+
+
     record = False
     center = deque(maxlen = 2)
     center.appendleft((0,0))
@@ -77,6 +91,9 @@ def main():
         color_frame = cv2.flip(color_frame, 1)
         frame = color_frame
         raw_depth_frame=cv2.flip(raw_depth_frame,1)
+        cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
+        cv2.setMouseCallback('Color Stream', mouseRGB)
+
         #cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
         #cv2.imshow('RealSense', color_frame)
         #cv2.waitKey(1)
@@ -118,7 +135,7 @@ def main():
                     if (frameCount > 4):
                         trackStick(leftStick)
                         distance=vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+                        cv2.putText(frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                         #cv2.circle(frame, center[i], 10, (76,76,156), 3
 
@@ -128,7 +145,7 @@ def main():
                     if (frameCount > 4):
                         trackStick(rightStick)
                         distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        cv2.putText(color_frame, "{}mm".format(distance), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+                        cv2.putText(frame, "{}mm".format(distance), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
 
@@ -142,6 +159,9 @@ def main():
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
+
+        cv2.rectangle(frame, (180,200), (220,250), (255,0,0), 2)
+
         cv2.imshow("Color Stream",frame)
         cv2.imshow("Depth Strem", depth_frame)
         #key = cv2.waitKey(1) & 0xFF
@@ -155,19 +175,8 @@ def main():
 
 
 
-def mouseRGB(event,x,y,flags,param):
-    if event == cv2.EVENT_LBUTTONDOWN: #checks mouse left button down condition
-        colorsB = color_image[y,x,0]
-        colorsG = color_image[y,x,1]
-        colorsR = color_image[y,x,2]
-        colors = color_image[y,x]
-        print("Red: ",colorsR)
-        print("Green: ",colorsG)
-        print("Blue: ",colorsB)
-        print("BGR Format: ",colors)
-        print("Coordinates of pixel: X: ",x,"Y: ",y)
 
-#cv2.setMouseCallback('Color Stream', mouseRGB) put in code to enable function
+
 
 if __name__== "__main__":
     main()
