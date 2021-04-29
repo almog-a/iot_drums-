@@ -51,6 +51,7 @@ def playDrumByPosition(x, y, volume):
         hihat.play(volume)
 
 def main():
+    record = False
     center = deque(maxlen = 2)
     center.appendleft((0,0))
     center.appendleft((0,0))
@@ -61,7 +62,9 @@ def main():
     objUpper = (97, 244, 255)
     frameCount = 0
     #vs1 = WebcamVideoStream(src=1).start()
-    vs = rs.DepthCamera()
+    file_name =  'C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
+
+    vs = rs.DepthCamera(record,file_name )
     vs.startStream()
 
     #vs = FileVideoStream(0).start()
@@ -135,14 +138,30 @@ def main():
                         trackStick(rightStick)
         cv2.imshow("Color Stream",frame)
         cv2.imshow("Depth Strem", depth_frame)
-        key = cv2.waitKey(1) & 0xFF
+        #key = cv2.waitKey(1) & 0xFF
         frameCount += 1
     
         # if the 'q' key is pressed, stop the loop
-        if key == 27:
+        if vs.keyUI():
             break
     vs.release()
     cv2.destroyAllWindows()
+
+
+
+def mouseRGB(event,x,y,flags,param):
+    if event == cv2.EVENT_LBUTTONDOWN: #checks mouse left button down condition
+        colorsB = color_image[y,x,0]
+        colorsG = color_image[y,x,1]
+        colorsR = color_image[y,x,2]
+        colors = color_image[y,x]
+        print("Red: ",colorsR)
+        print("Green: ",colorsG)
+        print("Blue: ",colorsB)
+        print("BGR Format: ",colors)
+        print("Coordinates of pixel: X: ",x,"Y: ",y)
+
+#cv2.setMouseCallback('Color Stream', mouseRGB) put in code to enable function
 
 if __name__== "__main__":
     main()

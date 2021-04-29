@@ -56,14 +56,37 @@ class DepthCamera:
     def release(self):
         self.pipeline.stop()
 
-    def keyUI(self, key):
-            #get a key from main loop, if key is space, stop video
-        if key == ord(" "):
+    def keyUI(self):
+            #get a key from main loop, if key is space, stop video if escape quit
+        flag = False #if getting Esc key change to true
+        key = cv2.waitKey(1)
+        if key == 27:  # Esc key
+            flag = True
+        elif key == ord(" "):
             while True:
                 key = cv2.waitKey(1)
                 if key == ord(" "):
                     break
 
+        return flag
+
+
     def get_distance(self,x,y,depth_frame):
         distance = depth_frame[y,x]
         return distance
+
+    def find_color(self,frame):
+        # Convert BGR to HSV
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        # define range of blue color in HSV
+        #lower_tr = cv2.cvtColor(np.uint8([[[170, 175, 120]]]), cv2.COLOR_RGB2HSV)
+        #upper_tr = cv2.cvtColor(np.uint8([[[255, 255, 190]]]), cv2.COLOR_RGB2HSV)
+        lower_tr = np.array([ 30,  40, 152])
+        upper_tr = np.array([50,  95, 255])
+
+        # Threshold the HSV image to get only blue colors
+        mask = cv2.inRange(hsv, lower_tr, upper_tr)
+
+        # Bitwise-AND mask and original image
+        res = cv2.bitwise_and(frame, frame, mask=mask)
+        return res
