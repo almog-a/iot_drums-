@@ -22,6 +22,11 @@ floor = DrumSound("../audio/", "Floor", 5, ".wav")
 hihat = DrumSound("../audio/", "Hat", 5, ".wav")
 ride = DrumSound("../audio/", "Ride", 5, ".wav")
 
+
+#algoritm for background removal
+backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
+
+
 def trackStick(stick):
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
@@ -61,6 +66,7 @@ def main():
 
     #vs = FileVideoStream(0).start()
     time.sleep(1.0)
+
     while True:
         # Read in 1 frame at a time and flip the image
         is_captured, depth_frame, color_frame,raw_depth_frame = vs.get_frame()
@@ -69,12 +75,13 @@ def main():
         color_frame = cv2.flip(color_frame, 1)
         frame = color_frame
         raw_depth_frame=cv2.flip(raw_depth_frame,1)
-        #cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-        #cv2.imshow('RealSense', color_frame)
-        #cv2.waitKey(1)
-        overlay = color_frame.copy()
 
 
+        #removing background, may cause latency
+        fgMask = backSub.apply(frame)
+        frame = cv2.bitwise_and(color_frame,color_frame, mask=fgMask)
+
+        overlay = frame.copy()
         alpha = 0.5
         cv2.line(overlay,(150,0),(150,600),(138,138,138),1)
         cv2.addWeighted(overlay, alpha, frame, 1 - alpha,0, frame)
@@ -105,7 +112,7 @@ def main():
                     if (frameCount > 4):
                         trackStick(leftStick)
                         distance=vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+                        cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
                         #cv2.circle(frame, center[i], 10, (76,76,156), 3
 
                 else:
