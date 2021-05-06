@@ -8,6 +8,10 @@ class DepthCamera:
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.run_record = run_record
+        self.objLower = (30, 86, 14)
+        self.objUpper = (97, 244, 255)
+        self.calibrate_color = False # if turn to True, will calibrate color according to next mouse click
+        self.frame = []
         if not run_record:
         # Get device product line for setting a supporting resolution
             pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
@@ -68,7 +72,10 @@ class DepthCamera:
                 key = cv2.waitKey(1)
                 if key == ord(" "):
                     break
-
+        elif key == ord("c"): #calibrate color
+            self.calibrate_color = True
+        elif key == ord("f"):  # finish calibrate color
+            self.calibrate_color = False
         return flag
 
 
@@ -76,18 +83,38 @@ class DepthCamera:
         distance = depth_frame[y,x]
         return distance
 
-    def find_color(self,frame):
+    def find_color(self, frame):
         # Convert BGR to HSV
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         # define range of blue color in HSV
-        #lower_tr = cv2.cvtColor(np.uint8([[[170, 175, 120]]]), cv2.COLOR_RGB2HSV)
-        #upper_tr = cv2.cvtColor(np.uint8([[[255, 255, 190]]]), cv2.COLOR_RGB2HSV)
-        lower_tr = np.array([ 30,  40, 152])
-        upper_tr = np.array([50,  95, 255])
+        #objLower = cv2.cvtColor(np.uint8([[[170, 175, 120]]]), cv2.COLOR_RGB2HSV)
+        #objUpper = cv2.cvtColor(np.uint8([[[255, 255, 190]]]), cv2.COLOR_RGB2HSV)
+        #objLower = np.array([ 30,  40, 152])
+        #objUpper = np.array([50,  95, 255])
 
         # Threshold the HSV image to get only blue colors
-        mask = cv2.inRange(hsv, lower_tr, upper_tr)
+        mask = cv2.inRange(hsv, self.objLower, self.objUpper)
 
         # Bitwise-AND mask and original image
         res = cv2.bitwise_and(frame, frame, mask=mask)
-        return res
+        return mask, res
+
+    def mouseRGB(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
+            colorsB = self.frame[y, x, 0]
+            colorsG = self.frame[y, x, 1]
+            colorsR = self.frame[y, x, 2]
+            colors = self.frame[y, x]
+            if self.calibrate_color:
+                delta=5
+                delta1=20
+                hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
+                print("HSV Format: ", hsv_color)
+                self.objLower = np.array([max(hsv_color[0]-delta, 0), max(hsv_color[1]-delta1,0), max(hsv_color[2]-delta,0)])
+                self.objUpper = np.array([min(hsv_color[0]+delta,179), min(hsv_color[1]+delta1,255), min(hsv_color[2]+delta,255)])
+
+            print("Red: ", colorsR)
+            print("Green: ", colorsG)
+            print("Blue: ", colorsB)
+            print("BGR Format: ", colors)
+            print("Coordinates of pixel: X: ", x, "Y: ", y)

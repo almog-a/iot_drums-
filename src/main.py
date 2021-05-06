@@ -52,20 +52,7 @@ def playDrumByPosition(x, y, volume):
         hihat.play(volume)
 
 def main():
-    def mouseRGB(event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
-            colorsB = frame[y, x, 0]
-            colorsG = frame[y, x, 1]
-            colorsR = frame[y, x, 2]
-            colors = frame[y, x]
-            print("Red: ", colorsR)
-            print("Green: ", colorsG)
-            print("Blue: ", colorsB)
-            print("BGR Format: ", colors)
-            print("Coordinates of pixel: X: ", x, "Y: ", y)
-
-
-    record = False
+    record = False  #change to true if working with records
     center = deque(maxlen = 2)
     center.appendleft((0,0))
     center.appendleft((0,0))
@@ -82,6 +69,8 @@ def main():
     vs.startStream()
 
     #vs = FileVideoStream(0).start()
+    cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
+    cv2.setMouseCallback('Color Stream', vs.mouseRGB)
     time.sleep(1.0)
     while True:
         # Read in 1 frame at a time and flip the image
@@ -90,9 +79,9 @@ def main():
         depth_frame = cv2.flip(depth_frame, 1)
         color_frame = cv2.flip(color_frame, 1)
         frame = color_frame
-        raw_depth_frame=cv2.flip(raw_depth_frame,1)
-        cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
-        cv2.setMouseCallback('Color Stream', mouseRGB)
+        vs.frame = color_frame
+        raw_depth_frame = cv2.flip(raw_depth_frame,1)
+
 
         #cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
         #cv2.imshow('RealSense', color_frame)
@@ -111,8 +100,7 @@ def main():
         cv2.line(frame,(450,0),(450,600),(138,138,138),1)
 
         # Mask the image so the result is just the drum stick tips
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, objLower, objUpper)
+        mask, res = vs.find_color(frame)
         mask = cv2.erode(mask, None, iterations=1)
 
         # Find contours in the mask
@@ -164,6 +152,8 @@ def main():
 
         cv2.imshow("Color Stream",frame)
         cv2.imshow("Depth Strem", depth_frame)
+        cv2.imshow("res Strem", res)
+
         #key = cv2.waitKey(1) & 0xFF
         frameCount += 1
     
