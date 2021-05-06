@@ -36,3 +36,4 @@ class Stick:
 
     def getY(self):
         return self.points[0][1]
+

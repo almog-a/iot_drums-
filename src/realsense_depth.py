@@ -96,8 +96,10 @@ class DepthCamera:
 
         # Threshold the HSV image to get only blue colors
         mask = cv2.inRange(hsv, self.objLower, self.objUpper)
-        mask = cv2.erode(mask, None, iterations=1)
-
+        #mask = cv2.erode(mask, None, iterations=1)
+        kernel = np.ones((3, 3), np.uint8)
+        #mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
         # Bitwise-AND mask and original image
         res = cv2.bitwise_and(frame, frame, mask=mask)
@@ -109,8 +111,13 @@ class DepthCamera:
 
         # sort cnts so we can loop through the two biggest (the sticks hopefully)
         cnts = sorted(cnts,key = lambda x: cv2.contourArea(x), reverse = True)
-
         return cnts
+
+    def findSticks(self, cnts):
+
+        numSticks = min(len(cnts), 2)
+
+        return numSticks
 
     def mouseRGB(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
@@ -120,8 +127,8 @@ class DepthCamera:
             colors = self.color_frame[y, x]
             hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
             if self.calibrate_color:
-                delta = 3
-                delta1 = 30
+                delta = 5
+                delta1 = 50
                 self.objLower = np.array([max(hsv_color[0]-delta, 0), max(hsv_color[1]-delta1,0), max(hsv_color[2]-delta1,0)])
                 self.objUpper = np.array([min(hsv_color[0]+delta,179), min(hsv_color[1]+delta1,255), min(hsv_color[2]+delta1,255)])
 

@@ -28,28 +28,30 @@ ride = DrumSound("../audio/", "Ride", 5, ".wav")
 backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 
 
-def trackStick(stick):
-    stick.setMin(min(stick.getMin(), stick.getY()))
-    if (len(stick.getPoints()) == 4):
-        yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]
-        if (stick.getIsGoingDown() and yDirection < -20):
-            volume = 600 - stick.getMin()
-            volume = int(volume / 100) -1
-            #snare.play(volume)
-            playDrumByPosition(stick.getX(), stick.getY(), volume)
-            stick.setMin(600)
-            stick.updateIsGoingDown(False)
-        if np.abs(yDirection) > 20 and yDirection >= 0:
-            stick.updateIsGoingDown(True)
+def trackStick(stick, frameCount):
+    if frameCount > 4:  # -לבדוק אם אפשר להעיף - אפשר, צריך להתחל ארבע נקודות מקלות בבנאי
+        stick.setMin(min(stick.getMin(), stick.getY()))
+        if (len(stick.getPoints()) == 4):
+            yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]
+            if (stick.getIsGoingDown() and yDirection < -20):
+                volume = 600 - stick.getMin()
+                volume = int(volume / 100) -1
+                #snare.play(volume)
+                playDrumByPosition(stick.getX(), stick.getY(), volume)
+                stick.setMin(600)
+                stick.updateIsGoingDown(False)
+            if np.abs(yDirection) > 20 and yDirection >= 0:
+                stick.updateIsGoingDown(True)
     return 
 
 def playDrumByPosition(x, y, volume):
-    s1.write('s'.encode())
     if (x < 360):
+        #s1.write('kick@'.encode())
         kick.play(volume)
     elif (x < 360):
         snare.play(volume)
     else:
+        #s1.write('hihat@'.encode())
         hihat.play(volume)
 
 def main():
@@ -58,11 +60,12 @@ def main():
     center = deque(maxlen = 2)
     center.appendleft((0,0))
     center.appendleft((0,0))
+    min_stick_radius=4
     leftStick = Stick("left")
     rightStick = Stick("right")
     frameCount = 0
     file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
-    vs = rs.DepthCamera(record, file_name )
+    vs = rs.DepthCamera(record, file_name)
     vs.startStream()
 
     cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
@@ -84,41 +87,39 @@ def main():
         # Find contours in the mask
         cnts = vs.find_cnt(mask)
 
-        numSticks = min(len(cnts), 2)
+        numSticks = vs.findSticks(cnts)
+        #sticks_pos = vs.findSticks(cnts)
+
         for i in range(numSticks):
-            ((x, y), radius) = cv2.minEnclosingCircle(cnts[i]) #find a circle to enclose cnts[i]
-            if (radius > 4):
+            ((x, y), radius) = cv2.minEnclosingCircle(cnts[i]) #find a circle that enclose cnts[i]
+            if (radius > min_stick_radius):
                 center.appendleft((int(x),int(y)))
         for i in range(numSticks):
             if (numSticks > 1):
                 if (center[i][0] <= center[(i + 1) % 2][0]): #check which center is left
                     cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
                     leftStick.addPoint(center[i][0], center[i][1])
-                    if (frameCount > 4):
-                        trackStick(leftStick)
-                        distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                    trackStick(leftStick, frameCount)
+                    distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
+                    cv2.putText(color_frame, "{}mm".format(distance), ( leftStick.getX() - 20, leftStick.getY()), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
                     cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
                     rightStick.addPoint(center[i][0], center[i][1])
-                    if (frameCount > 4):
-                        trackStick(rightStick)
-                        distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        cv2.putText(color_frame, "{}mm".format(distance), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                    trackStick(rightStick ,frameCount)
+                    distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
+                    cv2.putText(color_frame, "{}mm".format(distance), (rightStick.getX() - 20 ,rightStick.getY()), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
 
             else:
                 if(center[i][0]>= 300):
                     leftStick.addPoint(center[i][0], center[i][1])
-                    if (frameCount > 4):
-                        trackStick(leftStick)
+                    trackStick(leftStick, frameCount)
 
                 else:
                     rightStick.addPoint(center[i][0], center[i][1])
-                    if (frameCount > 4):
-                        trackStick(rightStick)
+                    trackStick(rightStick, frameCount)
         if debug:
             cv2.imshow("Depth Strem", depth_frame)
             cv2.imshow("res Strem", res)
@@ -142,6 +143,6 @@ def main():
 
 
 if __name__== "__main__":
-    s1 = serial.Serial('COM4', 9600)
+ #   s1 = serial.Serial('COM4', 9600)
     time.sleep(3)
     main()
