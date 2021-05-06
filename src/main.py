@@ -12,6 +12,7 @@ import imutils
 import time
 import simpleaudio as sa
 import src.realsense_depth as rs
+import serial
 ##### taking care of imports
 #----------comment-----
 
@@ -43,7 +44,7 @@ def trackStick(stick):
     return 
 
 def playDrumByPosition(x, y, volume):
-
+    s1.write('s'.encode())
     if (x < 360):
         kick.play(volume)
     elif (x < 360):
@@ -52,88 +53,59 @@ def playDrumByPosition(x, y, volume):
         hihat.play(volume)
 
 def main():
+    debug = False
     record = False  #change to true if working with records
     center = deque(maxlen = 2)
     center.appendleft((0,0))
     center.appendleft((0,0))
     leftStick = Stick("left")
     rightStick = Stick("right")
-    # Upper and lower bounds (HSV) for the stick color
-    objLower = (30, 86, 14)
-    objUpper = (97, 244, 255)
     frameCount = 0
-    #vs1 = WebcamVideoStream(src=1).start()
-    file_name =  'C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
-
-    vs = rs.DepthCamera(record,file_name )
+    file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
+    vs = rs.DepthCamera(record, file_name )
     vs.startStream()
 
-    #vs = FileVideoStream(0).start()
     cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
     cv2.setMouseCallback('Color Stream', vs.mouseRGB)
     time.sleep(1.0)
     while True:
         # Read in 1 frame at a time and flip the image
         is_captured, depth_frame, color_frame,raw_depth_frame = vs.get_frame()
-        #frame = imutils.resize(frame, width = 600, height = 300)
-        depth_frame = cv2.flip(depth_frame, 1)
-        color_frame = cv2.flip(color_frame, 1)
-        frame = color_frame
-        vs.frame = color_frame
-        raw_depth_frame = cv2.flip(raw_depth_frame,1)
-
-
-        #cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-        #cv2.imshow('RealSense', color_frame)
-        #cv2.waitKey(1)
-        overlay = color_frame.copy()
-
+        color_frame = color_frame
+        vs.color_frame = color_frame
 
         #removing background, may cause latency
-        fgMask = backSub.apply(frame)
-        frame = cv2.bitwise_and(color_frame,color_frame, mask=fgMask)
-
-        overlay = frame.copy()
-        alpha = 0.5
-        cv2.line(overlay,(150,0),(150,600),(138,138,138),1)
-        cv2.addWeighted(overlay, alpha, frame, 1 - alpha,0, frame)
-        cv2.line(frame,(450,0),(450,600),(138,138,138),1)
+        #fgMask = backSub.apply(color_frame)
+        #color_frame = cv2.bitwise_and(color_frame,color_frame, mask=fgMask)
 
         # Mask the image so the result is just the drum stick tips
-        mask, res = vs.find_color(frame)
-        mask = cv2.erode(mask, None, iterations=1)
+        mask, res = vs.find_color(color_frame)
 
         # Find contours in the mask
-        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
+        cnts = vs.find_cnt(mask)
 
-        # sort cnts so we can loop through the two biggest (the sticks hopefully)
-        cnts = sorted(cnts,key = lambda x: cv2.contourArea(x), reverse = True)
-        
         numSticks = min(len(cnts), 2)
         for i in range(numSticks):
-            ((x, y), radius) = cv2.minEnclosingCircle(cnts[i])
+            ((x, y), radius) = cv2.minEnclosingCircle(cnts[i]) #find a circle to enclose cnts[i]
             if (radius > 4):
                 center.appendleft((int(x),int(y)))
         for i in range(numSticks):
             if (numSticks > 1):
-                if (center[i][0] <= center[(i + 1) % 2][0]):
-                    cv2.circle(frame, center[i], 10, (156, 76, 76), 3)
+                if (center[i][0] <= center[(i + 1) % 2][0]): #check which center is left
+                    cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(leftStick)
-                        distance=vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        cv2.putText(frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-
-                        #cv2.circle(frame, center[i], 10, (76,76,156), 3
+                        distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
+                        cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
-                    cv2.circle(frame, center[i], 10, (76,76,156), 3)
+                    cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
                         distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        cv2.putText(frame, "{}mm".format(distance), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                        cv2.putText(color_frame, "{}mm".format(distance), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
 
@@ -143,20 +115,21 @@ def main():
                     if (frameCount > 4):
                         trackStick(leftStick)
 
-                else: 
+                else:
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
+        if debug:
+            cv2.imshow("Depth Strem", depth_frame)
+            cv2.imshow("res Strem", res)
+        cv2.imshow("Color Stream", color_frame)
 
-        cv2.rectangle(frame, (180,200), (220,250), (255,0,0), 2)
 
-        cv2.imshow("Color Stream",frame)
-        cv2.imshow("Depth Strem", depth_frame)
-        cv2.imshow("res Strem", res)
+
 
         #key = cv2.waitKey(1) & 0xFF
         frameCount += 1
-    
+
         # if the 'q' key is pressed, stop the loop
         if vs.keyUI():
             break
@@ -169,4 +142,6 @@ def main():
 
 
 if __name__== "__main__":
+    s1 = serial.Serial('COM4', 9600)
+    time.sleep(3)
     main()

@@ -1,6 +1,8 @@
 import pyrealsense2 as rs
 import numpy as np
 import cv2
+import imutils
+
 #--
 class DepthCamera:
     def __init__(self, run_record =False ,file_name='NO_FILE'):
@@ -11,7 +13,7 @@ class DepthCamera:
         self.objLower = (30, 86, 14)
         self.objUpper = (97, 244, 255)
         self.calibrate_color = False # if turn to True, will calibrate color according to next mouse click
-        self.frame = []
+        self.color_frame = []
         if not run_record:
         # Get device product line for setting a supporting resolution
             pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
@@ -56,7 +58,7 @@ class DepthCamera:
         raw_depth_image = np.asanyarray(raw_depth_frame.get_data())
         if not raw_depth_frame or not color_frame:
             return False, None, None, None
-        return True, depth_image, color_image, raw_depth_image
+        return True, cv2.flip(depth_image, 1), cv2.flip(color_image, 1), cv2.flip(raw_depth_image, 1)
 
     def release(self):
         self.pipeline.stop()
@@ -94,27 +96,38 @@ class DepthCamera:
 
         # Threshold the HSV image to get only blue colors
         mask = cv2.inRange(hsv, self.objLower, self.objUpper)
+        mask = cv2.erode(mask, None, iterations=1)
+
 
         # Bitwise-AND mask and original image
         res = cv2.bitwise_and(frame, frame, mask=mask)
         return mask, res
 
+    def find_cnt(self, mask):
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+
+        # sort cnts so we can loop through the two biggest (the sticks hopefully)
+        cnts = sorted(cnts,key = lambda x: cv2.contourArea(x), reverse = True)
+
+        return cnts
+
     def mouseRGB(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
-            colorsB = self.frame[y, x, 0]
-            colorsG = self.frame[y, x, 1]
-            colorsR = self.frame[y, x, 2]
-            colors = self.frame[y, x]
+            #colorsB = self.color_frame[y, x, 0]
+            #colorsG = self.color_frame[y, x, 1]
+            #colorsR = self.color_frame[y, x, 2]
+            colors = self.color_frame[y, x]
+            hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
             if self.calibrate_color:
-                delta=5
-                delta1=20
-                hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
-                print("HSV Format: ", hsv_color)
-                self.objLower = np.array([max(hsv_color[0]-delta, 0), max(hsv_color[1]-delta1,0), max(hsv_color[2]-delta,0)])
-                self.objUpper = np.array([min(hsv_color[0]+delta,179), min(hsv_color[1]+delta1,255), min(hsv_color[2]+delta,255)])
+                delta = 3
+                delta1 = 30
+                self.objLower = np.array([max(hsv_color[0]-delta, 0), max(hsv_color[1]-delta1,0), max(hsv_color[2]-delta1,0)])
+                self.objUpper = np.array([min(hsv_color[0]+delta,179), min(hsv_color[1]+delta1,255), min(hsv_color[2]+delta1,255)])
 
-            print("Red: ", colorsR)
-            print("Green: ", colorsG)
-            print("Blue: ", colorsB)
+            #print("Red: ", colorsR)
+            #print("Green: ", colorsG)
+            #print("Blue: ", colorsB)
+            print("HSV Format: ", hsv_color)
             print("BGR Format: ", colors)
             print("Coordinates of pixel: X: ", x, "Y: ", y)
