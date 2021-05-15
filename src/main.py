@@ -89,7 +89,7 @@ def playDrumByPosition(x,y,z,volume):
 
 
 def main():
-    debug = False
+    debug = True
     record = False  #change to true if working with records
     center = deque(maxlen = 2)
     center.appendleft((0,0))
@@ -112,7 +112,6 @@ def main():
         rightStick.setRawDepthFrame(raw_depth_frame)
         color_frame = color_frame
         vs.color_frame = color_frame
-        locate_drums_in_frame(color_frame)
         #removing background, may cause latency
         #fgMask = backSub.apply(color_frame)
         #color_frame = cv2.bitwise_and(color_frame,color_frame, mask=fgMask)
@@ -138,7 +137,7 @@ def main():
                         #distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
                         trackStick(leftStick)
 
-                        cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                        cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getX() ,leftStick.getY()- 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
                     cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
@@ -146,7 +145,7 @@ def main():
                     if (frameCount > 4):
                         #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
                         trackStick(rightStick)
-                        cv2.putText(color_frame, "{}mm".format(rightStick.getZ()), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                        cv2.putText(color_frame, "{}mm".format(rightStick.getZ()), (rightStick.getX() ,rightStick.getY() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
 
@@ -166,6 +165,8 @@ def main():
         if debug:
             cv2.imshow("Depth Strem", depth_frame)
             cv2.imshow("res Strem", res)
+
+        locate_drums_in_frame(color_frame)
         cv2.imshow("Color Stream", color_frame)
 
 
