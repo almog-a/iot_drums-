@@ -5,9 +5,9 @@ import numpy as np
 class Stick:
     def __init__(self, name):
         self.points = deque(maxlen = 4)
-        self.minPoint = 500
+        self.minPoint = 480
         self.isGoingDown = False
-        self.min = 500
+        self.min = 480
         self.name = name
 
     def getName(self):
@@ -36,3 +36,5 @@ class Stick:
 
     def getY(self):
         return self.points[0][1]
+
+    # 0 1 2 3 4

@@ -10,6 +10,8 @@ class DrumSound:
         self.sounds = []
         self.audioExtention = audioExtention
         self.load()
+
+
     def load(self):
         for i in range(1, self.numberOfSounds + 1):
             path = "" + self.pathToAudioFolder + "/"+ self.name + str(i) + self.audioExtention
@@ -19,9 +21,9 @@ class DrumSound:
     def play(self, volumeIndex):
         # Play loudest sound if given volume is greater than max 
         if (volumeIndex > self.numberOfSounds - 1):
-            self.sounds[self.numberOfSounds -1].play()
+            self.sounds[self.numberOfSounds -1].play() #sound[4]
         # Play softest sound if less than 0
         elif (volumeIndex < 0):
-            self.sounds[0].play()
+            self.sounds[0].play() #sound[0]
         else:
             self.sounds[volumeIndex].play()
