@@ -12,7 +12,8 @@ class DepthCamera:
         self.run_record = run_record
         self.objLower = (30, 86, 14)
         self.objUpper = (97, 244, 255)
-        self.calibrate_color = False # if turn to True, will calibrate color according to next mouse click
+        self.calibrate_color = False  # if turn to True, will calibrate color according to next mouse click
+        self.calibrate_points = []  # will contain calibration points.
         self.color_frame = []
         if not run_record:
         # Get device product line for setting a supporting resolution
@@ -75,9 +76,11 @@ class DepthCamera:
                 if key == ord(" "):
                     break
         elif key == ord("c"): #calibrate color
-            self.calibrate_color = True
+            self.calibrate_color = True #starting the calibrating process
         elif key == ord("f"):  # finish calibrate color
             self.calibrate_color = False
+            self.calibrate_points = []  # initializing points for next calibration
+
         return flag
 
 
@@ -88,19 +91,11 @@ class DepthCamera:
     def find_color(self, frame):
         # Convert BGR to HSV
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        # define range of blue color in HSV
-        #objLower = cv2.cvtColor(np.uint8([[[170, 175, 120]]]), cv2.COLOR_RGB2HSV)
-        #objUpper = cv2.cvtColor(np.uint8([[[255, 255, 190]]]), cv2.COLOR_RGB2HSV)
-        #objLower = np.array([ 30,  40, 152])
-        #objUpper = np.array([50,  95, 255])
-
         # Threshold the HSV image to get only blue colors
         mask = cv2.inRange(hsv, self.objLower, self.objUpper)
-        #mask = cv2.erode(mask, None, iterations=1)
         kernel = np.ones((3, 3), np.uint8)
-        #mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-
+        #mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         # Bitwise-AND mask and original image
         res = cv2.bitwise_and(frame, frame, mask=mask)
         return mask, res
@@ -119,6 +114,16 @@ class DepthCamera:
 
         return numSticks
 
+    def calibrateColor(self, hsv_color):
+        # this function is called after the user pick a point for calibration, and setting lower and upper coordinates
+        # for color
+        delta = 3
+        delta1 = 10
+        self.calibrate_points.append(hsv_color)
+        self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
+        self.objUpper = (np.array(self.calibrate_points)).max(0) + np.array([delta, delta1, delta1])
+
+
     def mouseRGB(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
             #colorsB = self.color_frame[y, x, 0]
@@ -127,14 +132,9 @@ class DepthCamera:
             colors = self.color_frame[y, x]
             hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
             if self.calibrate_color:
-                delta = 5
-                delta1 = 50
-                self.objLower = np.array([max(hsv_color[0]-delta, 0), max(hsv_color[1]-delta1,0), max(hsv_color[2]-delta1,0)])
-                self.objUpper = np.array([min(hsv_color[0]+delta,179), min(hsv_color[1]+delta1,255), min(hsv_color[2]+delta1,255)])
+                self.calibrateColor(hsv_color)
 
-            #print("Red: ", colorsR)
-            #print("Green: ", colorsG)
-            #print("Blue: ", colorsB)
+
             print("HSV Format: ", hsv_color)
             print("BGR Format: ", colors)
             print("Coordinates of pixel: X: ", x, "Y: ", y)

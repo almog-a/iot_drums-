@@ -174,7 +174,7 @@ def main():
         #key = cv2.waitKey(1) & 0xFF
         frameCount += 1
 
-        # if the 'q' key is pressed, stop the loop
+        # if the 'Esc' key is pressed, quit
         if vs.keyUI():
             break
     vs.release()
