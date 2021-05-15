@@ -30,8 +30,7 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 
 
 
-def trackStick(stick,distance):
-
+def trackStick(stick):
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
         yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]  #last-current
@@ -39,7 +38,7 @@ def trackStick(stick,distance):
             volume = 600 - stick.getMin()
             volume = int(volume / 100) -1
             #snare.play(volume)
-            playDrumByPosition(stick.getX(), stick.getY(), volume,distance)
+            playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
         if np.abs(yDirection) > 20 and yDirection >= 0:
@@ -73,40 +72,20 @@ def playDrumByPosition(x, y, volume):
         hihat.play(volume)
 '''
 
-def is_drum(x,y,distance,points):
+def is_drum(x,y,z,points):
     left_x, down_y = points[0][0], points[0][1] #first point
     right_x,up_y=points[1][0],points[1][1] #second point
     close_z,far_z=points[2][0],points[2][1]
-    if (x<right_x)and(x>left_x)and(y<up_y)and(y>down_y)and(distance<far_z)and(distance>close_z):
+    if (x<right_x)and(x>left_x)and(y<up_y)and(y>down_y)and(z<far_z)and(z>close_z):
         return True
-
     return False
 
 
-def playDrumByPosition(x,y, volume,distance):
+def playDrumByPosition(x,y,z,volume):
   #  s1.write('s'.encode())
     snare_points,kick_points=define_locations()
-    if(is_drum(x,y,distance,snare_points)): snare.play(volume)
-    if (is_drum(x, y,distance, kick_points)): kick.play(volume)
-
-'''
-    left_x_snare,up_y_snare=snare_points[0][0],snare_points[0][1]
-    right_x_snare,down_y_snare=snare_points[1][0],snare_points[1][1]
-    left_x_kick, up_y_kick = kick_points[0][0], kick_points[0][1]
-    right_x_kick, down_y_kick = kick_points[1][0], kick_points[1][1]
-    
-    if ((x < right_x_snare)and(x>left_x_snare)):
-        snare.play(volume)
-
-    if (x < right_x_snare) and (x > left_x_snare):
-        snare.play(volume)
-
-
-    elif (x > right_x_snare):
-        snare.play(volume)
-    else:
-        hihat.play(volume)
-    '''
+    if(is_drum(x,y,z,snare_points)): snare.play(volume)
+    if (is_drum(x, y,z, kick_points)): kick.play(volume)
 
 
 def main():
@@ -115,12 +94,13 @@ def main():
     center = deque(maxlen = 2)
     center.appendleft((0,0))
     center.appendleft((0,0))
-    leftStick = Stick("left")
-    rightStick = Stick("right")
+
     frameCount = 0
     file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
     vs = rs.DepthCamera(record, file_name )
     vs.startStream()
+    leftStick = Stick("left",vs)
+    rightStick = Stick("right",vs)
 
     cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
     cv2.setMouseCallback('Color Stream', vs.mouseRGB)
@@ -128,6 +108,8 @@ def main():
     while True:
         # Read in 1 frame at a time and flip the image
         is_captured, depth_frame, color_frame,raw_depth_frame = vs.get_frame()
+        leftStick.setRawDepthFrame(raw_depth_frame)
+        rightStick.setRawDepthFrame(raw_depth_frame)
         color_frame = color_frame
         vs.color_frame = color_frame
         locate_drums_in_frame(color_frame)
@@ -152,19 +134,19 @@ def main():
                     cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
-                        #trackStick(leftStick)
-                        distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        trackStick(leftStick, distance)
-                        cv2.putText(color_frame, "{}mm".format(distance), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+
+                        #distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
+                        trackStick(leftStick)
+
+                        cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getY(), leftStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
                     cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
-                        # trackStick(leftStick)
-                        distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        trackStick(rightStick,distance)
-                        cv2.putText(color_frame, "{}mm".format(distance), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                        #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
+                        trackStick(rightStick)
+                        cv2.putText(color_frame, "{}mm".format(rightStick.getZ()), (rightStick.getY(), rightStick.getX() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
 
@@ -172,15 +154,15 @@ def main():
 
                 if(center[i][0]>= 300):
                     leftStick.addPoint(center[i][0], center[i][1])
-                    distance = vs.get_distance(leftStick.getX(), leftStick.getY(), raw_depth_frame)
+                    #distance = vs.get_distance(leftStick.getX(), leftStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(leftStick,distance)
+                        trackStick(leftStick)
 
                 else:
                     rightStick.addPoint(center[i][0], center[i][1])
-                    distance = vs.get_distance(rightStick.getX(), rightStick.getY(), raw_depth_frame)
+                    #distance = vs.get_distance(rightStick.getX(), rightStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(rightStick,distance)
+                        trackStick(rightStick)
         if debug:
             cv2.imshow("Depth Strem", depth_frame)
             cv2.imshow("res Strem", res)
