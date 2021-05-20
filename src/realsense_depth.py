@@ -94,10 +94,13 @@ class DepthCamera:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         # Threshold the HSV image to get only blue colors
         mask = cv2.inRange(hsv, self.objLower, self.objUpper)
-        kernel = np.ones((3, 3), np.uint8)
+        #kernel = np.ones((3, 3), np.uint8)
+        mask = cv2.erode(mask, None, iterations=1)
+
+
         #mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         #mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        mask = cv2.erode(mask, None, iterations=1)
+        #mask = cv2.erode(mask, None, iterations=1)
 
 
         # Bitwise-AND mask and original image
