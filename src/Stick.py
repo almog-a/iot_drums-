@@ -13,6 +13,11 @@ class Stick:
         self.raw_depth_frame=[]
         self.vs=vs
 
+        self.points.appendleft((0, 0))
+        self.points.appendleft((0, 0))
+        self.points.appendleft((0, 0))
+        self.points.appendleft((0, 0))
+
     def setRawDepthFrame(self,raw_depth_frame):
         self.raw_depth_frame=raw_depth_frame
 
@@ -45,7 +50,10 @@ class Stick:
 
     def addPoint(self, x, y):
         z = self.findDepthByXY(x,y)
-        self.points.appendleft((x,y,z))
+        #self.points.appendleft((x,y,z))
+
+        #if len(self.points) != 0 and (x, y) != (self.points[0][0], self.points[0][1]):
+        self.points.appendleft((x, y,z))
 
     def getX(self):
         return self.points[0][0]

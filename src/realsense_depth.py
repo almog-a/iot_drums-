@@ -12,6 +12,7 @@ class DepthCamera:
         self.run_record = run_record
         self.objLower = (30, 86, 14)
         self.objUpper = (97, 244, 255)
+
         self.calibrate_color = False  # if turn to True, will calibrate color according to next mouse click
         self.calibrate_points = []  # will contain calibration points.
         self.color_frame = []
@@ -95,7 +96,10 @@ class DepthCamera:
         mask = cv2.inRange(hsv, self.objLower, self.objUpper)
         kernel = np.ones((3, 3), np.uint8)
         #mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        #mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        mask = cv2.erode(mask, None, iterations=1)
+
+
         # Bitwise-AND mask and original image
         res = cv2.bitwise_and(frame, frame, mask=mask)
         return mask, res
@@ -117,8 +121,12 @@ class DepthCamera:
     def calibrateColor(self, hsv_color):
         # this function is called after the user pick a point for calibration, and setting lower and upper coordinates
         # for color
-        delta = 2
-        delta1 = 10
+
+        delta = 0
+        delta1 = 0
+
+#        delta = 2
+ #       delta1 = 10
         self.calibrate_points.append(hsv_color)
         self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
         self.objUpper = (np.array(self.calibrate_points)).max(0) + np.array([delta, delta1, delta1])

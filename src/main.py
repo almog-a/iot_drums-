@@ -47,8 +47,8 @@ def trackStick(stick):
 
 def define_locations():
     #define the points of all drums and return them
-    snare_points=[(6,177),(263,337),(320,640)]
-    kick_points=[ (359,177),(625,337),(320,640)]
+    snare_points=[(6,0),(263,9999),(0,99999)]
+    kick_points=[ (359,0),(625,99999),(0,99999)]
     return snare_points,kick_points;
 
 def locate_drums_in_frame(color_frame):
@@ -73,6 +73,7 @@ def playDrumByPosition(x, y, volume):
 '''
 
 def is_drum(x,y,z,points):
+    return True
     left_x, down_y = points[0][0], points[0][1] #first point
     right_x,up_y=points[1][0],points[1][1] #second point
     close_z,far_z=points[2][0],points[2][1]
@@ -116,11 +117,31 @@ def main():
         #fgMask = backSub.apply(color_frame)
         #color_frame = cv2.bitwise_and(color_frame,color_frame, mask=fgMask)
 
+        # important !!! to return it to code
         # Mask the image so the result is just the drum stick tips
-        mask, res = vs.find_color(color_frame)
+        #mask, res = vs.find_color(color_frame)
 
         # Find contours in the mask
-        cnts = vs.find_cnt(mask)
+        #cnts = vs.find_cnt(mask)
+
+
+
+        ####temporarely added!!
+
+
+        # Mask the image so the result is just the drum stick tips
+        hsv = cv2.cvtColor(color_frame, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, (30, 86, 14), (97, 244, 255))
+        mask = cv2.erode(mask, None, iterations=1)
+
+
+        # Find contours in the mask
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+
+        # sort cnts so we can loop through the two biggest (the sticks hopefully)
+        cnts = sorted(cnts, key=lambda x: cv2.contourArea(x), reverse=True)
+        res = cv2.bitwise_and(color_frame, color_frame, mask=mask)
 
         numSticks = min(len(cnts), 2)
         for i in range(numSticks):
