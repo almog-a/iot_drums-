@@ -53,7 +53,7 @@ class Stick:
         #self.points.appendleft((x,y,z))
 
         #if len(self.points) != 0 and (x, y) != (self.points[0][0], self.points[0][1]):
-        self.points.appendleft((x, y,z))
+        self.points.appendleft((x,y,z))
 
     def getX(self):
         return self.points[0][0]

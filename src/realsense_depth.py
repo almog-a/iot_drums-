@@ -22,8 +22,18 @@ class DepthCamera:
             pipeline_profile = self.config.resolve(pipeline_wrapper)
             device = pipeline_profile.get_device()
             device_product_line = str(device.get_info(rs.camera_info.product_line))
-            self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-            self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+            #updates resolution
+            self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
+            self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
+
+
+            #old res
+            #self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+            #self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+
+
         else:
             # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
             rs.config.enable_device_from_file(self.config, file_name)
@@ -94,10 +104,10 @@ class DepthCamera:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         # Threshold the HSV image to get only blue colors
         mask = cv2.inRange(hsv, self.objLower, self.objUpper)
-        #kernel = np.ones((3, 3), np.uint8)
+        kernel = np.ones((5, 5), np.uint8)
         mask = cv2.erode(mask, None, iterations=1)
 
-
+        #mask = cv2.dilate(mask, kernel)
         #mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         #mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         #mask = cv2.erode(mask, None, iterations=1)
@@ -125,8 +135,8 @@ class DepthCamera:
         # this function is called after the user pick a point for calibration, and setting lower and upper coordinates
         # for color
 
-        delta = 0
-        delta1 = 0
+        delta = 2
+        delta1 = 20
 
 #        delta = 2
  #       delta1 = 10

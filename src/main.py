@@ -47,8 +47,8 @@ def trackStick(stick):
 
 def define_locations():
     #define the points of all drums and return them
-    snare_points=[(6,0),(263,200),(0,99999)]
-    kick_points=[ (359,300),(625,400),(0,99999)]
+    snare_points = [(6, 150), (263, 350), (0, 99999)]
+    kick_points = [(359, 150), (625, 350), (0, 9999)]
     return snare_points,kick_points;
 
 def locate_drums_in_frame(color_frame):
@@ -73,17 +73,27 @@ def playDrumByPosition(x, y, volume):
 '''
 
 def is_drum(x,y,z,points):
-    return True
+    #return True
     left_x, down_y = points[0][0], points[0][1] #first point
     right_x,up_y=points[1][0],points[1][1] #second point
     close_z,far_z=points[2][0],points[2][1]
-    if (x<right_x)and(x>left_x)and(y<up_y)and(y>down_y)and(z<far_z)and(z>close_z):
+
+    # down_y:177, up_y: 337, right_x:263, up_y=337
+
+    #up_y is ok and down has problems!!
+    if (x < right_x) and (x > left_x) and (y < up_y) and (y > down_y-55):  # and (z < far_z) and (z > close_z):
+
+    #if (x < right_x) and (x > left_x) and (y < up_y) and (y > down_y): #and (z < far_z) and (z > close_z):
+
+
+ #   if (x<right_x)and(x>left_x)and(y<up_y)and(y>down_y)and(z<far_z)and(z>close_z):
         return True
     return False
 
 
 def playDrumByPosition(x,y,z,volume):
   #  s1.write('s'.encode())
+    snare_points,kick_points=define_locations()
     snare_points,kick_points=define_locations()
     if(is_drum(x,y,z,snare_points)): snare.play(volume)
     if (is_drum(x, y,z, kick_points)): kick.play(volume)
@@ -124,6 +134,8 @@ def main():
         # Find contours in the mask
         cnts = vs.find_cnt(mask)
         ##### was commented until year in debug
+
+
 
         '''
         ####temporarely added!! to debug color recognition problem 
