@@ -24,13 +24,15 @@ class DepthCamera:
             device_product_line = str(device.get_info(rs.camera_info.product_line))
 
             #updates resolution
-            self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
-            self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
+            #self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
+            #self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
 
+            #self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 60)
+            #self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60)
 
-            #old res
-            #self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-            #self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        #old res
+            self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+            self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
 
 
@@ -135,14 +137,72 @@ class DepthCamera:
         # this function is called after the user pick a point for calibration, and setting lower and upper coordinates
         # for color
 
-        delta = 2
-        delta1 = 20
+        delta = 0
+        delta1 = 0
 
-#        delta = 2
- #       delta1 = 10
         self.calibrate_points.append(hsv_color)
         self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
         self.objUpper = (np.array(self.calibrate_points)).max(0) + np.array([delta, delta1, delta1])
+
+    #def nothing():
+     #   pass
+
+    def createTrackbar(self):
+        cap = cv2.VideoCapture(0)
+        s="Trackbars"
+        cv2.namedWindow(s)
+
+        low_h=self.objLower[0]
+        low_s = self.objLower[1]
+        low_v = self.objLower[2]
+
+        high_h = self.objUpper[0]
+        high_s = self.objUpper[1]
+        high_v = self.objUpper[2]
+
+        delta_h=50
+        delta_s=15
+        delta_v=15
+
+        nothing=lambda *args : None
+        cv2.createTrackbar("L - H", "Trackbars", low_h, 179, nothing)
+        cv2.createTrackbar("L - S", "Trackbars", low_s, 256, nothing)
+        cv2.createTrackbar("L - V", "Trackbars", low_v, 256, nothing)
+        cv2.createTrackbar("U - H", "Trackbars", high_h, 179, nothing)
+        cv2.createTrackbar("U - S", "Trackbars", high_s, 256, nothing)
+        cv2.createTrackbar("U - V", "Trackbars", high_v, 256, nothing)
+
+        #
+        # cv2.createTrackbar("L - H", "Trackbars", low_h, low_h+delta_h, nothing)
+        # cv2.createTrackbar("L - S", "Trackbars", low_s, low_s-delta_s, nothing)
+        # cv2.createTrackbar("L - V", "Trackbars", low_v, low_v+delta_v, nothing)
+        # cv2.createTrackbar("U - H", "Trackbars", high_h, high_h+delta_h, nothing)
+        # cv2.createTrackbar("U - S", "Trackbars", high_s, high_s+delta_s, nothing)
+        # cv2.createTrackbar("U - V", "Trackbars", high_v, high_v+delta_v, nothing)
+
+        return cap,s
+
+    def controlBar(self):
+        l_h = cv2.getTrackbarPos("L - H", "Trackbars")
+        l_s = cv2.getTrackbarPos("L - S", "Trackbars")
+        l_v = cv2.getTrackbarPos("L - V", "Trackbars")
+        u_h = cv2.getTrackbarPos("U - H", "Trackbars")
+        u_s = cv2.getTrackbarPos("U - S", "Trackbars")
+        u_v = cv2.getTrackbarPos("U - V", "Trackbars")
+
+        self.objLower = np.array([l_h, l_s, l_v])
+        self.objUpper = np.array([u_h, u_s, u_v])
+
+
+    def updateBar(self):
+        cv2.setTrackbarPos("L - H","Trackbars",self.objLower[0])
+        cv2.setTrackbarPos("L - s", "Trackbars", self.objLower[1])
+        cv2.setTrackbarPos("L - v", "Trackbars", self.objLower[2])
+
+        cv2.setTrackbarPos("U - H","Trackbars",self.objUpper[0])
+        cv2.setTrackbarPos("U - s", "Trackbars", self.objUpper[1])
+        cv2.setTrackbarPos("U - v", "Trackbars", self.objUpper[2])
+
 
 
     def mouseRGB(self, event, x, y, flags, param):
@@ -154,6 +214,8 @@ class DepthCamera:
             hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
             if self.calibrate_color:
                 self.calibrateColor(hsv_color)
+                self.updateBar()
+
 
 
             print("HSV Format: ", hsv_color)

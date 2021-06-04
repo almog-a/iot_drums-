@@ -30,34 +30,64 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 
 
 
+def calculateVolume(stick) -> int:
+    stick_acceleration = stick.getStickAcceleration()
+    volume = 0
+    if stick_acceleration > 10000:
+        volume = 5
+    elif stick_acceleration > 8000:
+        volume = 4
+    elif stick_acceleration > 6000:
+        volume = 3
+    elif stick_acceleration > 4000:
+        volume = 2
+    elif stick_acceleration > 2000:
+        volume = 1
+    return volume
+
+
+
 def trackStick(stick):
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
         yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]  #last-current
-        if (stick.getIsGoingDown() and yDirection < -20):
-            volume = 600 - stick.getMin()
-            volume = int(volume / 100) -1
+        if (stick.getIsGoingDown() and yDirection < -10):
+            volume = calculateVolume(stick)
+
+            #volume = 600 - stick.getMin()
+            #volume = int(volume / 100) -1
             #snare.play(volume)
             playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
-        if np.abs(yDirection) > 20 and yDirection >= 0:
+        if np.abs(yDirection) > 10 and yDirection >= 0:
             stick.updateIsGoingDown(True)
     return
 
 def define_locations():
     #define the points of all drums and return them
-    snare_points = [(6, 150), (263, 350), (0, 99999)]
-    kick_points = [(359, 150), (625, 350), (0, 9999)]
-    return snare_points,kick_points;
+
+    #snare_points = [(6, 0), (263, 99999), (0, 99999)]
+    #kick_points = [(359, 0), (625, 99999), (0, 9999)]
+
+
+    hihate_points = [(6, 150), (263, 350), (0, 99999)]
+    snare_points =[(359, 150), (625, 350), (0, 9999)]
+
+    kick_points = [(359, 390), (625, 100000), (0, 9999)]
+
+
+    return snare_points,kick_points,hihate_points;
 
 def locate_drums_in_frame(color_frame):
     #locate the drums rectangles
-    snare_points,kick_points=define_locations()
+    snare_points,kick_points,hihat_points=define_locations()
     snare=cv2.rectangle(color_frame, snare_points[0], snare_points[1], (0, 76, 76), 2)
     cv2.putText(color_frame, "snare", (5, 150), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 76, 76), 2)
-    kick = cv2.rectangle(color_frame, kick_points[0], kick_points[1], (255, 0, 0), 2)
+    hihat = cv2.rectangle(color_frame, hihat_points[0], hihat_points[1], (255, 0, 0), 2)
     cv2.putText(color_frame, "kick", (380, 150), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 0), 2)
+    kick = cv2.rectangle(color_frame, kick_points[0], kick_points[1], (255, 0, 0), 2)
+
    # cv2.putText(color_frame, 'snare', (snare_points[0], snare_points[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
     #kick=cv2.rectangle(img, kick_points[0], kick_points[1], (255, 0, 0), 2)
     return
@@ -81,7 +111,7 @@ def is_drum(x,y,z,points):
     # down_y:177, up_y: 337, right_x:263, up_y=337
 
     #up_y is ok and down has problems!!
-    if (x < right_x) and (x > left_x) and (y < up_y) and (y > down_y-55):  # and (z < far_z) and (z > close_z):
+    if (x < right_x) and (x > left_x) and (y < up_y+30) and (y > down_y-55):  # and (z < far_z) and (z > close_z):
 
     #if (x < right_x) and (x > left_x) and (y < up_y) and (y > down_y): #and (z < far_z) and (z > close_z):
 
@@ -93,11 +123,11 @@ def is_drum(x,y,z,points):
 
 def playDrumByPosition(x,y,z,volume):
   #  s1.write('s'.encode())
-    snare_points,kick_points=define_locations()
-    snare_points,kick_points=define_locations()
+    snare_points,kick_points,hihat_points=define_locations()
+    snare_points,kick_points,hihat_points=define_locations()
     if(is_drum(x,y,z,snare_points)): snare.play(volume)
     if (is_drum(x, y,z, kick_points)): kick.play(volume)
-
+    if (is_drum(x, y, z, hihat_points)): hihat.play(volume)
 
 def main():
     debug = True
@@ -116,19 +146,47 @@ def main():
     cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
     cv2.setMouseCallback('Color Stream', vs.mouseRGB)
     time.sleep(1.0)
+    cap,s=vs.createTrackbar()
+
+
+    #l, u = (26, 10, 30), (26, 10, 30)
+    #l,u=(26, 10, 30),(97, 100, 255)
     while True:
+        ''''''
+        vs.controlBar()
         # Read in 1 frame at a time and flip the image
         is_captured, depth_frame, color_frame,raw_depth_frame = vs.get_frame()
         leftStick.setRawDepthFrame(raw_depth_frame)
         rightStick.setRawDepthFrame(raw_depth_frame)
-        color_frame = color_frame
         vs.color_frame = color_frame
+        l=vs.objLower
+        u=vs.objUpper
+
+        '''
+        #change all green to pure green
+        hsv = cv2.cvtColor(color_frame, cv2.COLOR_BGR2HSV)
+
+        #check if we are before calibration
+        flag1=np.array_equal((30, 86, 14),l)
+        flag2=np.array_equal((97, 244, 255),u)
+        if((flag1 is False) or (flag2 is False)):
+        #if(True):
+            greenMask = cv2.inRange(hsv, l, u) #after calibration
+            color_frame[greenMask == 255] = (0, 255, 0)
+        #vs.color_frame = color_frame
+        l,u=vs.objLower,vs.objUpper
+        
+        
+        #green mask ends here - probably unnecessary
+        '''
+
         #removing background, may cause latency
         #fgMask = backSub.apply(color_frame)
         #color_frame = cv2.bitwise_and(color_frame,color_frame, mask=fgMask)
 
          #important !!! to return it to code
         # Mask the image so the result is just the drum stick tips
+
         mask, res = vs.find_color(color_frame)
 
         # Find contours in the mask
@@ -198,6 +256,7 @@ def main():
         if debug:
             cv2.imshow("Depth Strem", depth_frame)
             cv2.imshow("res Strem", res)
+            cv2.imshow("mask", mask)
 
         locate_drums_in_frame(color_frame)
         cv2.imshow("Color Stream", color_frame)
