@@ -9,7 +9,7 @@ class graphic_drums:
         self.points_dict = drum_locations
         self.vs = vs
         self.is_debug = is_debug
-        cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
+        cv2.namedWindow('Color Stream', cv2.WND_PROP_FULLSCREEN)
         cv2.setMouseCallback('Color Stream', self.vs.mouseRGB)
 
     def __del__(self):
@@ -56,12 +56,12 @@ class graphic_drums:
 
     def updateBar(self):
         cv2.setTrackbarPos("L - H","Trackbars",self.vs.objLower[0])
-        cv2.setTrackbarPos("L - s", "Trackbars", self.vs.objLower[1])
-        cv2.setTrackbarPos("L - v", "Trackbars", self.vs.objLower[2])
+        cv2.setTrackbarPos("L - S", "Trackbars", self.vs.objLower[1])
+        cv2.setTrackbarPos("L - V", "Trackbars", self.vs.objLower[2])
 
         cv2.setTrackbarPos("U - H","Trackbars",self.vs.objUpper[0])
-        cv2.setTrackbarPos("U - s", "Trackbars", self.vs.objUpper[1])
-        cv2.setTrackbarPos("U - v", "Trackbars", self.vs.objUpper[2])
+        cv2.setTrackbarPos("U - S", "Trackbars", self.vs.objUpper[1])
+        cv2.setTrackbarPos("U - V", "Trackbars", self.vs.objUpper[2])
 
     def locate_drums_in_frame(self, color_frame):
         # locate the drums rectangles
