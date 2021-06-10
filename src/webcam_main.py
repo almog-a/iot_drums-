@@ -212,7 +212,9 @@ def main():
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         trackStick(rightStick)
-        cv2.imshow("Frame", frame)
+        cv2.namedWindow('Color Stream',cv2.WND_PROP_FULLSCREEN)
+        #cv2.setWindowProperty("Color Stream",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+        cv2.imshow("Color Stream", frame)
         key = cv2.waitKey(1) & 0xFF
         frameCount += 1
 

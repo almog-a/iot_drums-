@@ -33,15 +33,16 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 def calculateVolume(stick) -> int:
     stick_acceleration = stick.getStickAcceleration()
     volume = 0
-    if stick_acceleration > 10000:
+    delta=2000
+    if stick_acceleration > 10000-delta:
         volume = 5
-    elif stick_acceleration > 8000:
+    elif stick_acceleration > 8000-delta:
         volume = 4
-    elif stick_acceleration > 6000:
+    elif stick_acceleration > 6000-delta:
         volume = 3
-    elif stick_acceleration > 4000:
+    elif stick_acceleration > 4000-delta:
         volume = 2
-    elif stick_acceleration > 2000:
+    elif stick_acceleration > 2000-delta:
         volume = 1
     return volume
 
@@ -162,23 +163,7 @@ def main():
         l=vs.objLower
         u=vs.objUpper
 
-        '''
-        #change all green to pure green
-        hsv = cv2.cvtColor(color_frame, cv2.COLOR_BGR2HSV)
 
-        #check if we are before calibration
-        flag1=np.array_equal((30, 86, 14),l)
-        flag2=np.array_equal((97, 244, 255),u)
-        if((flag1 is False) or (flag2 is False)):
-        #if(True):
-            greenMask = cv2.inRange(hsv, l, u) #after calibration
-            color_frame[greenMask == 255] = (0, 255, 0)
-        #vs.color_frame = color_frame
-        l,u=vs.objLower,vs.objUpper
-        
-        
-        #green mask ends here - probably unnecessary
-        '''
 
         #removing background, may cause latency
         #fgMask = backSub.apply(color_frame)
@@ -194,22 +179,6 @@ def main():
         ##### was commented until year in debug
 
 
-
-        '''
-        ####temporarely added!! to debug color recognition problem 
-        # Mask the image so the result is just the drum stick tips
-        hsv = cv2.cvtColor(color_frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, (30, 86, 14), (97, 244, 255))
-        mask = cv2.erode(mask, None, iterations=1)
-        # Find contours in the mask
-        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
-
-        # sort cnts so we can loop through the two biggest (the sticks hopefully)
-        cnts = sorted(cnts, key=lambda x: cv2.contourArea(x), reverse=True)
-        res = cv2.bitwise_and(color_frame, color_frame, mask=mask)
-        ## added until here in debug 
-        '''
 
 
 
@@ -259,7 +228,9 @@ def main():
             cv2.imshow("mask", mask)
 
         locate_drums_in_frame(color_frame)
+        cv2.setWindowProperty("Color Stream",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
         cv2.imshow("Color Stream", color_frame)
+
 
 
 

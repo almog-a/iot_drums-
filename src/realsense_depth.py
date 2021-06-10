@@ -24,15 +24,15 @@ class DepthCamera:
             device_product_line = str(device.get_info(rs.camera_info.product_line))
 
             #updates resolution
-            #self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
-            #self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
+            self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
+            self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
 
             #self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 60)
             #self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60)
 
         #old res
-            self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-            self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+            #self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+            #self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
 
 
@@ -137,8 +137,8 @@ class DepthCamera:
         # this function is called after the user pick a point for calibration, and setting lower and upper coordinates
         # for color
 
-        delta = 0
-        delta1 = 0
+        delta = 2
+        delta1 = 10
 
         self.calibrate_points.append(hsv_color)
         self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
