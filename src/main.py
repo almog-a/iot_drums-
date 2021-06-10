@@ -1,6 +1,7 @@
 from collections import deque
 from src.DrumSound import DrumSound
 from src.Stick import Stick
+from src.drums import Drums
 import numpy as np
 import cv2
 import time
@@ -27,15 +28,16 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 def calculateVolume(stick) -> int:
     stick_acceleration = stick.getStickAcceleration()
     volume = 0
-    if stick_acceleration > 10000:
+    delta=2000
+    if stick_acceleration > 10000-delta:
         volume = 5
-    elif stick_acceleration > 8000:
+    elif stick_acceleration > 8000-delta:
         volume = 4
-    elif stick_acceleration > 6000:
+    elif stick_acceleration > 6000-delta:
         volume = 3
-    elif stick_acceleration > 4000:
+    elif stick_acceleration > 4000-delta:
         volume = 2
-    elif stick_acceleration > 2000:
+    elif stick_acceleration > 2000-delta:
         volume = 1
     return volume
 
@@ -92,9 +94,10 @@ def main():
     vs.startStream()
     leftStick = Stick("left",vs)
     rightStick = Stick("right",vs)
-
+    drums = Drums()
     #dictionary with drum boundaries
-    drum_locations = define_locations()
+    #drum_locations = define_locations()
+    drum_locations = drums.get_locations()
     graphicDrums = graphic_drums(vs=vs, drum_locations=drum_locations, is_debug=debug)
     vs.setUpdateBarFunc(graphicDrums.updateBar)
     time.sleep(1.0)
@@ -128,7 +131,8 @@ def main():
         for i in range(numSticks):
             if (numSticks > 1):
                 if (center[i][0] <= center[(i + 1) % 2][0]): #check which center is left
-                    cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
+                    #cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
+                    graphicDrums.add_circle(center[i],(156, 76, 76))
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
 
@@ -137,7 +141,8 @@ def main():
                         cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getX() ,leftStick.getY()- 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
-                    cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
+                    #cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
+                    graphicDrums.add_circle(center[i],(76,76,156))
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
