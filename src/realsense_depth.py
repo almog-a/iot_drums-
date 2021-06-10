@@ -146,13 +146,13 @@ class DepthCamera:
             hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
             if self.calibrate_color:
                 self.calibrateColor(hsv_color)
-                self.graphicDrums.updateBar()
+                self.updatebarFunc()
             print("HSV Format: ", hsv_color)
             print("BGR Format: ", colors)
             print("Coordinates of pixel: X: ", x, "Y: ", y)
 
 
     def setUpdateBarFunc(self, func_to_save):
-        if(self.updatebarFunc == None):
+        if(self.updatebarFunc != None):
             raise Exception("updateBar for graphic class is already set")
         self.updatebarFunc = func_to_save

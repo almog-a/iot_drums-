@@ -11,7 +11,6 @@ class graphic_drums:
         self.is_debug = is_debug
         cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
         cv2.setMouseCallback('Color Stream', self.vs.mouseRGB)
-        vs.updatebarFunc(self.updateBar)
 
     def __del__(self):
         cv2.destroyAllWindows()

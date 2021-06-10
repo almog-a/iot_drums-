@@ -96,7 +96,7 @@ def main():
     #dictionary with drum boundaries
     drum_locations = define_locations()
     graphicDrums = graphic_drums(vs=vs, drum_locations=drum_locations, is_debug=debug)
-    #vs.updatebarFunc(graphicDrums)
+    vs.setUpdateBarFunc(graphicDrums.updateBar)
     time.sleep(1.0)
     cap,s=graphicDrums.createTrackbar()
 
