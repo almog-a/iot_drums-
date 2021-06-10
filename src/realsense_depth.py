@@ -22,19 +22,8 @@ class DepthCamera:
             pipeline_profile = self.config.resolve(pipeline_wrapper)
             device = pipeline_profile.get_device()
             device_product_line = str(device.get_info(rs.camera_info.product_line))
-
-            #updates resolution
             self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
             self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
-
-            #self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 60)
-            #self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 60)
-
-        #old res
-            #self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-            #self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-
-
 
         else:
             # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
@@ -146,64 +135,6 @@ class DepthCamera:
 
     #def nothing():
      #   pass
-
-    def createTrackbar(self):
-        cap = cv2.VideoCapture(0)
-        s="Trackbars"
-        cv2.namedWindow(s)
-
-        low_h=self.objLower[0]
-        low_s = self.objLower[1]
-        low_v = self.objLower[2]
-
-        high_h = self.objUpper[0]
-        high_s = self.objUpper[1]
-        high_v = self.objUpper[2]
-
-        delta_h=50
-        delta_s=15
-        delta_v=15
-
-        nothing=lambda *args : None
-        cv2.createTrackbar("L - H", "Trackbars", low_h, 179, nothing)
-        cv2.createTrackbar("L - S", "Trackbars", low_s, 256, nothing)
-        cv2.createTrackbar("L - V", "Trackbars", low_v, 256, nothing)
-        cv2.createTrackbar("U - H", "Trackbars", high_h, 179, nothing)
-        cv2.createTrackbar("U - S", "Trackbars", high_s, 256, nothing)
-        cv2.createTrackbar("U - V", "Trackbars", high_v, 256, nothing)
-
-        #
-        # cv2.createTrackbar("L - H", "Trackbars", low_h, low_h+delta_h, nothing)
-        # cv2.createTrackbar("L - S", "Trackbars", low_s, low_s-delta_s, nothing)
-        # cv2.createTrackbar("L - V", "Trackbars", low_v, low_v+delta_v, nothing)
-        # cv2.createTrackbar("U - H", "Trackbars", high_h, high_h+delta_h, nothing)
-        # cv2.createTrackbar("U - S", "Trackbars", high_s, high_s+delta_s, nothing)
-        # cv2.createTrackbar("U - V", "Trackbars", high_v, high_v+delta_v, nothing)
-
-        return cap,s
-
-    def controlBar(self):
-        l_h = cv2.getTrackbarPos("L - H", "Trackbars")
-        l_s = cv2.getTrackbarPos("L - S", "Trackbars")
-        l_v = cv2.getTrackbarPos("L - V", "Trackbars")
-        u_h = cv2.getTrackbarPos("U - H", "Trackbars")
-        u_s = cv2.getTrackbarPos("U - S", "Trackbars")
-        u_v = cv2.getTrackbarPos("U - V", "Trackbars")
-
-        self.objLower = np.array([l_h, l_s, l_v])
-        self.objUpper = np.array([u_h, u_s, u_v])
-
-
-    def updateBar(self):
-        cv2.setTrackbarPos("L - H","Trackbars",self.objLower[0])
-        cv2.setTrackbarPos("L - s", "Trackbars", self.objLower[1])
-        cv2.setTrackbarPos("L - v", "Trackbars", self.objLower[2])
-
-        cv2.setTrackbarPos("U - H","Trackbars",self.objUpper[0])
-        cv2.setTrackbarPos("U - s", "Trackbars", self.objUpper[1])
-        cv2.setTrackbarPos("U - v", "Trackbars", self.objUpper[2])
-
-
 
     def mouseRGB(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition

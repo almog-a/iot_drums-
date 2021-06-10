@@ -13,6 +13,8 @@ import time
 import simpleaudio as sa
 import src.realsense_depth as rs
 import serial
+
+from graphic_drums import graphic_drums
 ##### taking care of imports
 #----------comment-----
 
@@ -33,7 +35,7 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 def calculateVolume(stick) -> int:
     stick_acceleration = stick.getStickAcceleration()
     volume = 0
-    delta=2000
+    delta = 2000
     if stick_acceleration > 10000-delta:
         volume = 5
     elif stick_acceleration > 8000-delta:
@@ -47,18 +49,20 @@ def calculateVolume(stick) -> int:
     return volume
 
 
+def define_locations():
+    hihat_points = [(6, 150), (263, 350), (0, 99999)]
+    snare_points =[(359, 150), (625, 350), (0, 9999)]
+    kick_points = [(359, 390), (625, 100000), (0, 9999)]
+    return dict(hihat_points=hihat_points, snare_points=snare_points, kick_points=kick_points)
 
-def trackStick(stick):
+
+def trackStick(stick, drum_locations):
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
         yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]  #last-current
         if (stick.getIsGoingDown() and yDirection < -10):
             volume = calculateVolume(stick)
-
-            #volume = 600 - stick.getMin()
-            #volume = int(volume / 100) -1
-            #snare.play(volume)
-            playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume)
+            playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
         if np.abs(yDirection) > 10 and yDirection >= 0:
@@ -113,22 +117,14 @@ def is_drum(x,y,z,points):
 
     #up_y is ok and down has problems!!
     if (x < right_x) and (x > left_x) and (y < up_y+30) and (y > down_y-55):  # and (z < far_z) and (z > close_z):
-
-    #if (x < right_x) and (x > left_x) and (y < up_y) and (y > down_y): #and (z < far_z) and (z > close_z):
-
-
- #   if (x<right_x)and(x>left_x)and(y<up_y)and(y>down_y)and(z<far_z)and(z>close_z):
         return True
     return False
 
-
-def playDrumByPosition(x,y,z,volume):
+def playDrumByPosition(x,y,z,volume,drum_locations):
   #  s1.write('s'.encode())
-    snare_points,kick_points,hihat_points=define_locations()
-    snare_points,kick_points,hihat_points=define_locations()
-    if(is_drum(x,y,z,snare_points)): snare.play(volume)
-    if (is_drum(x, y,z, kick_points)): kick.play(volume)
-    if (is_drum(x, y, z, hihat_points)): hihat.play(volume)
+    if(is_drum(x,y,z,drum_locations['snare_points'])): snare.play(volume)
+    if (is_drum(x, y,z, drum_locations['kick_points'])): kick.play(volume)
+    if (is_drum(x, y, z, drum_locations['hihat_points'])): hihat.play(volume)
 
 def main():
     debug = True
@@ -136,7 +132,6 @@ def main():
     center = deque(maxlen = 2)
     center.appendleft((0,0))
     center.appendleft((0,0))
-
     frameCount = 0
     file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
     vs = rs.DepthCamera(record, file_name )
@@ -144,17 +139,14 @@ def main():
     leftStick = Stick("left",vs)
     rightStick = Stick("right",vs)
 
-    cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
-    cv2.setMouseCallback('Color Stream', vs.mouseRGB)
+    #dictionary with drum boundaries
+    drum_locations = define_locations()
+    graphicDrums = graphic_drums(vs=vs, drum_locations=drum_locations, is_debug=debug)
     time.sleep(1.0)
-    cap,s=vs.createTrackbar()
+    cap,s=graphicDrums.createTrackbar()
 
-
-    #l, u = (26, 10, 30), (26, 10, 30)
-    #l,u=(26, 10, 30),(97, 100, 255)
     while True:
-        ''''''
-        vs.controlBar()
+        graphicDrums.controlBar()
         # Read in 1 frame at a time and flip the image
         is_captured, depth_frame, color_frame,raw_depth_frame = vs.get_frame()
         leftStick.setRawDepthFrame(raw_depth_frame)
@@ -163,25 +155,16 @@ def main():
         l=vs.objLower
         u=vs.objUpper
 
-
-
         #removing background, may cause latency
         #fgMask = backSub.apply(color_frame)
         #color_frame = cv2.bitwise_and(color_frame,color_frame, mask=fgMask)
 
          #important !!! to return it to code
         # Mask the image so the result is just the drum stick tips
-
         mask, res = vs.find_color(color_frame)
-
         # Find contours in the mask
         cnts = vs.find_cnt(mask)
         ##### was commented until year in debug
-
-
-
-
-
         numSticks = min(len(cnts), 2)
         for i in range(numSticks):
             ((x, y), radius) = cv2.minEnclosingCircle(cnts[i]) #find a circle to enclose cnts[i]
@@ -195,8 +178,7 @@ def main():
                     if (frameCount > 4):
 
                         #distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        trackStick(leftStick)
-
+                        trackStick(leftStick, drum_locations)
                         cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getX() ,leftStick.getY()- 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
@@ -204,7 +186,7 @@ def main():
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        trackStick(rightStick)
+                        trackStick(rightStick, drum_locations)
                         cv2.putText(color_frame, "{}mm".format(rightStick.getZ()), (rightStick.getX() ,rightStick.getY() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
@@ -215,26 +197,15 @@ def main():
                     leftStick.addPoint(center[i][0], center[i][1])
                     #distance = vs.get_distance(leftStick.getX(), leftStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(leftStick)
+                        trackStick(leftStick, drum_locations)
 
                 else:
                     rightStick.addPoint(center[i][0], center[i][1])
                     #distance = vs.get_distance(rightStick.getX(), rightStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(rightStick)
-        if debug:
-            cv2.imshow("Depth Strem", depth_frame)
-            cv2.imshow("res Strem", res)
-            cv2.imshow("mask", mask)
-
-        locate_drums_in_frame(color_frame)
-        cv2.setWindowProperty("Color Stream",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-        cv2.imshow("Color Stream", color_frame)
-
-
-
-
-
+                        trackStick(rightStick, drum_locations)
+        graphicDrums.locate_drums_in_frame(color_frame)
+        graphicDrums.show_graphics(color_frame,depth_frame=depth_frame, res=res, mask=mask)
         #key = cv2.waitKey(1) & 0xFF
         frameCount += 1
 
@@ -242,10 +213,6 @@ def main():
         if vs.keyUI():
             break
     vs.release()
-    cv2.destroyAllWindows()
-
-
-
 
 
 

@@ -63,6 +63,28 @@ class Stick:
 
     def getZ(self):
         return self.points[0][2]
+    #velocity returned in pixel/s
+
+    def getStickVelocity(self,start_point,end_point):
+        vector_x = (end_point[0]-start_point[0])/(2/30)
+        vector_y = (end_point[1] - start_point[1])/(2/30)
+        #vector_z = (end_point[2] - start_point[2])/(2/30)
+        vector_z = 0
+        return (vector_x**2 + vector_y**2 + vector_z**2)**(0.5)
+
+    #returns acceleration pixel/s^2
+    def getStickAcceleration(self):
+        fps = 30 #frames per second
+        curr_velocity = self.getStickVelocity(end_point=self.points[0],start_point=self.points[1])
+        prev_velocity = self.getStickVelocity(end_point=self.points[2],start_point=self.points[3])
+        #it takes 1/30 to take one frame, the 2 velocities are based on 4 frames so 4*(1/30)=4/30
+        a = (curr_velocity - prev_velocity)/(4/30)
+        return a
+
+
+
+
+
     def getStickVelocity(self,start_point,end_point):
         vector_x = (end_point[0]-start_point[0])/(2/30)
         vector_y = (end_point[1] - start_point[1])/(2/30)
