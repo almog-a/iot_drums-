@@ -7,7 +7,7 @@ import time
 import src.realsense_depth as rs
 import serial
 
-from graphic_drums import graphic_drums
+from graphics import graphic_drums
 ##### taking care of imports
 #----------comment-----
 
@@ -88,7 +88,7 @@ def main():
     center.appendleft((0,0))
     frameCount = 0
     file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
-    vs = rs.DepthCamera(record, file_name )
+    vs = rs.DepthCamera(record, file_name)
     vs.startStream()
     leftStick = Stick("left",vs)
     rightStick = Stick("right",vs)
@@ -96,6 +96,7 @@ def main():
     #dictionary with drum boundaries
     drum_locations = define_locations()
     graphicDrums = graphic_drums(vs=vs, drum_locations=drum_locations, is_debug=debug)
+    #vs.updatebarFunc(graphicDrums)
     time.sleep(1.0)
     cap,s=graphicDrums.createTrackbar()
 
