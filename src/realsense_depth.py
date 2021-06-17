@@ -22,8 +22,8 @@ class DepthCamera:
             pipeline_profile = self.config.resolve(pipeline_wrapper)
             device = pipeline_profile.get_device()
             device_product_line = str(device.get_info(rs.camera_info.product_line))
-            self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
-            self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
+            self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+            self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
         else:
             # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
@@ -145,7 +145,7 @@ class DepthCamera:
             hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
             if self.calibrate_color:
                 self.calibrateColor(hsv_color)
-                self.updateBar()
+                #self.updateBar()
 
 
 

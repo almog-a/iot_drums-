@@ -68,7 +68,7 @@ def trackStick(stick, drum_locations):
         if np.abs(yDirection) > 10 and yDirection >= 0:
             stick.updateIsGoingDown(True)
     return
-
+'''
 def define_locations():
     #define the points of all drums and return them
 
@@ -83,7 +83,7 @@ def define_locations():
 
 
     return snare_points,kick_points,hihate_points;
-
+'''
 def locate_drums_in_frame(color_frame):
     #locate the drums rectangles
     snare_points,kick_points,hihat_points=define_locations()
