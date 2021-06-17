@@ -127,8 +127,8 @@ class DepthCamera:
         # this function is called after the user pick a point for calibration, and setting lower and upper coordinates
         # for color
 
-        delta = 0
-        delta1 = 0
+        delta = 2
+        delta1 = 15
 
         self.calibrate_points.append(hsv_color)
         self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
