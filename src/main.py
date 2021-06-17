@@ -79,14 +79,27 @@ def is_drum(x,y,z,points):
 def playDrumByPosition(x,y,z,volume,drum_locations):
   #  s1.write('s'.encode())
     if(is_drum(x,y,z,drum_locations['snare_points'])):
-      s1.write('snare@'.encode())
-      snare.play(volume)
-    if (is_drum(x, y,z, drum_locations['kick_points'])):
+        s1.write('snare@'.encode())
+        snare.play(volume)
+    elif (is_drum(x, y,z, drum_locations['kick_points'])):
         s1.write('kick@'.encode())
         kick.play(volume)
-    if (is_drum(x, y, z, drum_locations['hihat_points'])):
-      s1.write('hihat@'.encode())
-      hihat.play(volume)
+    elif (is_drum(x, y, z, drum_locations['hihat_points'])):
+        s1.write('hihat@'.encode())
+        hihat.play(volume)
+
+    elif (is_drum(x, y, z, drum_locations['tom_points'])):
+        s1.write('tom@'.encode())
+        tom.play(volume)
+
+    elif (is_drum(x, y, z, drum_locations['floor_points'])):
+        s1.write('floor@'.encode())
+        floor.play(volume)
+
+    elif (is_drum(x, y, z, drum_locations['ride_points'])):
+        s1.write('ride@'.encode())
+        ride.play(volume)
+
 
 def main():
     debug = True

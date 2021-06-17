@@ -69,11 +69,27 @@ class graphic_drums:
         snare_points = self.points_dict["snare_points"]
         kick_points = self.points_dict["kick_points"]
         hihat_points = self.points_dict["hihat_points"]
-        snare = cv2.rectangle(color_frame, snare_points[0], snare_points[1], (0, 76, 76), 2)
-        cv2.putText(color_frame, "snare", (5, 150), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 76, 76), 2)
+        tom_points = self.points_dict["tom_points"]
+        floor_points = self.points_dict["floor_points"]
+        ride_points = self.points_dict["ride_points"]
+
+        snare = cv2.rectangle(color_frame, snare_points[0], snare_points[1], (0, 0, 255), 2)
+        cv2.putText(color_frame, "snare", snare_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
+
         hihat = cv2.rectangle(color_frame, hihat_points[0], hihat_points[1], (255, 0, 0), 2)
-        cv2.putText(color_frame, "kick", (380, 150), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 0), 2)
-        kick = cv2.rectangle(color_frame, kick_points[0], kick_points[1], (255, 0, 0), 2)
+        cv2.putText(color_frame, "hihat", hihat_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 0), 2)
+
+        kick = cv2.rectangle(color_frame, kick_points[0], kick_points[1], (0, 255, 255), 2)
+        cv2.putText(color_frame, "kick", kick_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 255), 2)
+
+        tom = cv2.rectangle(color_frame, tom_points[0], tom_points[1], (0, 120, 255), 2)
+        cv2.putText(color_frame, "tom", tom_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 120, 255), 2)
+
+        floor = cv2.rectangle(color_frame, floor_points[0], floor_points[1], (0, 255, 0), 2)
+        cv2.putText(color_frame, "floor", floor_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 0), 2)
+
+        ride = cv2.rectangle(color_frame, ride_points[0], ride_points[1], (255, 0, 255), 2)
+        cv2.putText(color_frame, "ride", ride_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 0), 2)
 
     def show_graphics(self,color_frame,depth_frame = None,res=None,mask=None):
         if(self.is_debug):
