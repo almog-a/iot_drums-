@@ -10,9 +10,16 @@ class DepthCamera:
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.run_record = run_record
-        self.objLower = (30, 86, 14)
-        self.objUpper = (97, 244, 255)
+        self.objLower = (58, 178, 81) #green lower
+        self.objUpper = (77, 255, 133) #green upper
+        self.objLower_second = (30, 240, 220) #red lower
+        self.objUpper_second = (0, 255, 230) #red upper
+
+
+
+
         self.calibrate_color = False  # if turn to True, will calibrate color according to next mouse click
+        self.calibrate_type="n"
         self.calibrate_points = []  # will contain calibration points.
         self.color_frame = []
         self.updatebarFunc = None
@@ -79,9 +86,19 @@ class DepthCamera:
                 if key == ord(" "):
                     break
         elif key == ord("c"): #calibrate color
+            self.calibrate_points = []
             self.calibrate_color = True #starting the calibrating process
+            self.calibrate_type = "c"
+
+        elif key == ord("x"):  # calibrate color
+            self.calibrate_points = []
+            self.calibrate_color = True  # starting the calibrating process
+            self.calibrate_type = "x"
+
+
         elif key == ord("f"):  # finish calibrate color
             self.calibrate_color = False
+            self.calibrate_type = "n"
             self.calibrate_points = []  # initializing points for next calibration
 
         return flag
@@ -107,7 +124,27 @@ class DepthCamera:
 
         # Bitwise-AND mask and original image
         res = cv2.bitwise_and(frame, frame, mask=mask)
-        return mask, res
+
+        # second mask:
+
+        # Threshold the HSV image to get only blue colors
+        mask2 = cv2.inRange(hsv, self.objLower_second, self.objUpper_second)
+        kernel = np.ones((5, 5), np.uint8)
+        mask2 = cv2.erode(mask2, None, iterations=1)
+
+        #mask = cv2.dilate(mask, kernel)
+        #mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        #mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        #mask = cv2.erode(mask, None, iterations=1)
+
+
+        # Bitwise-AND mask and original image
+        res2 = cv2.bitwise_and(frame, frame, mask=mask2)
+
+
+
+
+        return mask, res, mask2,res2
 
     def find_cnt(self, mask):
         cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -131,8 +168,14 @@ class DepthCamera:
         delta1 = 15
 
         self.calibrate_points.append(hsv_color)
-        self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
-        self.objUpper = (np.array(self.calibrate_points)).max(0) + np.array([delta, delta1, delta1])
+
+        if self.calibrate_type=="c":
+            self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
+            self.objUpper = (np.array(self.calibrate_points)).max(0) + np.array([delta, delta1, delta1])
+        elif self.calibrate_type=="x":
+            self.objLower_second = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
+            self.objUpper_second = (np.array(self.calibrate_points)).max(0) + np.array([delta, delta1, delta1])
+
 
     #def nothing():
      #   pass
@@ -147,6 +190,8 @@ class DepthCamera:
             if self.calibrate_color:
                 self.calibrateColor(hsv_color)
                 self.updatebarFunc()
+
+
             print("HSV Format: ", hsv_color)
             print("BGR Format: ", colors)
             print("Coordinates of pixel: X: ", x, "Y: ", y)

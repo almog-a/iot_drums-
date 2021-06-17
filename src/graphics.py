@@ -19,50 +19,88 @@ class graphic_drums:
     def createTrackbar(self):
         cap = cv2.VideoCapture(0)
         s="Trackbars"
+        s2="Trackbars second color"
+
         cv2.namedWindow(s)
+        cv2.namedWindow(s2)
+
         low_h=self.vs.objLower[0]
         low_s = self.vs.objLower[1]
         low_v = self.vs.objLower[2]
         high_h = self.vs.objUpper[0]
         high_s = self.vs.objUpper[1]
         high_v = self.vs.objUpper[2]
-        delta_h=50
-        delta_s=15
-        delta_v=15
+
+        low_h2 = self.vs.objLower_second[0]
+        low_s2 = self.vs.objLower_second[1]
+        low_v2 = self.vs.objLower_second[2]
+        high_h2 = self.vs.objUpper_second[0]
+        high_s2 = self.vs.objUpper_second[1]
+        high_v2 = self.vs.objUpper_second[2]
+
         nothing=lambda *args : None
-        cv2.createTrackbar("L - H", "Trackbars", low_h, 179, nothing)
-        cv2.createTrackbar("L - S", "Trackbars", low_s, 256, nothing)
-        cv2.createTrackbar("L - V", "Trackbars", low_v, 256, nothing)
-        cv2.createTrackbar("U - H", "Trackbars", high_h, 179, nothing)
-        cv2.createTrackbar("U - S", "Trackbars", high_s, 256, nothing)
-        cv2.createTrackbar("U - V", "Trackbars", high_v, 256, nothing)
-        # cv2.createTrackbar("L - H", "Trackbars", low_h, low_h+delta_h, nothing)
-        # cv2.createTrackbar("L - S", "Trackbars", low_s, low_s-delta_s, nothing)
-        # cv2.createTrackbar("L - V", "Trackbars", low_v, low_v+delta_v, nothing)
-        # cv2.createTrackbar("U - H", "Trackbars", high_h, high_h+delta_h, nothing)
-        # cv2.createTrackbar("U - S", "Trackbars", high_s, high_s+delta_s, nothing)
-        # cv2.createTrackbar("U - V", "Trackbars", high_v, high_v+delta_v, nothing)
-        return cap,s
+        cv2.createTrackbar("L - H", s, low_h, 179, nothing)
+        cv2.createTrackbar("L - S", s, low_s, 256, nothing)
+        cv2.createTrackbar("L - V", s, low_v, 256, nothing)
+        cv2.createTrackbar("U - H", s, high_h, 179, nothing)
+        cv2.createTrackbar("U - S", s, high_s, 256, nothing)
+        cv2.createTrackbar("U - V", s, high_v, 256, nothing)
+
+        cv2.createTrackbar("L - H   2", s2, low_h2, 179, nothing)
+        cv2.createTrackbar("L - S   2", s2, low_s2, 256, nothing)
+        cv2.createTrackbar("L - V   2", s2, low_v2, 256, nothing)
+        cv2.createTrackbar("U - H   2", s2, high_h2, 179, nothing)
+        cv2.createTrackbar("U - S   2", s2, high_s2, 256, nothing)
+        cv2.createTrackbar("U - V   2", s2, high_v2, 256, nothing)
+
+        #return cap, s,
+        return cap,s,s2
 
     def controlBar(self):
-        l_h = cv2.getTrackbarPos("L - H", "Trackbars")
-        l_s = cv2.getTrackbarPos("L - S", "Trackbars")
-        l_v = cv2.getTrackbarPos("L - V", "Trackbars")
-        u_h = cv2.getTrackbarPos("U - H", "Trackbars")
-        u_s = cv2.getTrackbarPos("U - S", "Trackbars")
-        u_v = cv2.getTrackbarPos("U - V", "Trackbars")
+        s="Trackbars"
+        s2 = "Trackbars second color"
+
+        l_h = cv2.getTrackbarPos("L - H", s)
+        l_s = cv2.getTrackbarPos("L - S", s)
+        l_v = cv2.getTrackbarPos("L - V", s)
+        u_h = cv2.getTrackbarPos("U - H", s)
+        u_s = cv2.getTrackbarPos("U - S", s)
+        u_v = cv2.getTrackbarPos("U - V", s)
 
         self.vs.objLower = np.array([l_h, l_s, l_v])
         self.vs.objUpper = np.array([u_h, u_s, u_v])
 
-    def updateBar(self):
-        cv2.setTrackbarPos("L - H","Trackbars",self.vs.objLower[0])
-        cv2.setTrackbarPos("L - S", "Trackbars", self.vs.objLower[1])
-        cv2.setTrackbarPos("L - V", "Trackbars", self.vs.objLower[2])
 
-        cv2.setTrackbarPos("U - H","Trackbars",self.vs.objUpper[0])
-        cv2.setTrackbarPos("U - S", "Trackbars", self.vs.objUpper[1])
-        cv2.setTrackbarPos("U - V", "Trackbars", self.vs.objUpper[2])
+        l_h2 = cv2.getTrackbarPos("L - H   2", s2)
+        l_s2 = cv2.getTrackbarPos("L - S   2", s2)
+        l_v2 = cv2.getTrackbarPos("L - V   2", s2)
+        u_h2 = cv2.getTrackbarPos("U - H   2", s2)
+        u_s2 = cv2.getTrackbarPos("U - S   2", s2)
+        u_v2 = cv2.getTrackbarPos("U - V   2", s2)
+
+        self.vs.objLower_second = np.array([l_h2, l_s2, l_v2])
+        self.vs.objUpper_second = np.array([u_h2, u_s2, u_v2])
+
+
+    def updateBar(self):
+        s = "Trackbars"
+        s2 = "Trackbars second color"
+        cv2.setTrackbarPos("L - H",s,self.vs.objLower[0])
+        cv2.setTrackbarPos("L - S", s, self.vs.objLower[1])
+        cv2.setTrackbarPos("L - V", s, self.vs.objLower[2])
+
+        cv2.setTrackbarPos("U - H",s,self.vs.objUpper[0])
+        cv2.setTrackbarPos("U - S", s, self.vs.objUpper[1])
+        cv2.setTrackbarPos("U - V", s, self.vs.objUpper[2])
+
+        s2="Trackbars second color"
+        cv2.setTrackbarPos("L - H   2", s2, self.vs.objLower_second[0])
+        cv2.setTrackbarPos("L - S   2", s2, self.vs.objLower_second[1])
+        cv2.setTrackbarPos("L - V   2", s2, self.vs.objLower_second[2])
+
+        cv2.setTrackbarPos("U - H   2", s2, self.vs.objUpper_second[0])
+        cv2.setTrackbarPos("U - S   2", s2, self.vs.objUpper_second[1])
+        cv2.setTrackbarPos("U - V   2", s2, self.vs.objUpper_second[2])
 
     def locate_drums_in_frame(self, color_frame):
         # locate the drums rectangles
@@ -89,17 +127,31 @@ class graphic_drums:
         cv2.putText(color_frame, "floor", floor_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 0), 2)
 
         ride = cv2.rectangle(color_frame, ride_points[0], ride_points[1], (255, 0, 255), 2)
-        cv2.putText(color_frame, "ride", ride_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 0), 2)
+        cv2.putText(color_frame, "ride", ride_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)
 
-    def show_graphics(self,color_frame,depth_frame = None,res=None,mask=None):
+    def show_graphics(self,color_frame,depth_frame = None,res=None,mask=None,res2=None,mask2=None):
         if(self.is_debug):
             cv2.imshow("Depth Strem", depth_frame)
             cv2.imshow("res Strem", res)
-            cv2.imshow("mask", mask)
+            #cv2.imshow("mask", mask)
+            cv2.imshow("res Strem 2", res2)
+            #cv2.imshow("mask", mask2)
         for center,color in self.circles:
             cv2.circle(color_frame, center, 10, color, 3)
-        cv2.imshow("Color Stream", color_frame)
         self.circles.clear()
+        #color_frame2=cv2.convertScaleAbs(color_frame, -2, 2)
+        img=color_frame
+        '''
+        brightness = 85
+        contrast = -20
+        img = np.int16(color_frame)
+        img = img * (contrast / 127 + 1) - contrast + brightness
+        img = np.clip(img, 0, 255)
+        img = np.uint8(img)
+        '''
+        cv2.imshow("Color Stream", color_frame)
+        #cv2.imshow("Color Stream2", img)
+
 
     def add_circle(self,center,color):
         self.circles.append((center, color))

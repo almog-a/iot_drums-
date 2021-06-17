@@ -50,15 +50,16 @@ def define_locations():
 
 
 def trackStick(stick, drum_locations):
+
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
         yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]  #last-current
-        if (stick.getIsGoingDown() and yDirection < -10):
+        if (stick.getIsGoingDown() and yDirection < -stick.sensitivity):
             volume = calculateVolume(stick)
             playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
-        if np.abs(yDirection) > 10 and yDirection >= 0:
+        if np.abs(yDirection) > stick.sensitivity and yDirection >= 0:
             stick.updateIsGoingDown(True)
     return
 
@@ -78,25 +79,25 @@ def is_drum(x,y,z,points):
 
 def playDrumByPosition(x,y,z,volume,drum_locations):
     if(is_drum(x,y,z,drum_locations['snare_points'])):
-        #s1.write('snare@'.encode())
+        s1.write('snare@'.encode())
         snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
-        #s1.write('kick@'.encode())
+        s1.write('kick@'.encode())
         kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
-        #s1.write('hihat@'.encode())
+        s1.write('hihat@'.encode())
         hihat.play(volume)
 
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
-        #s1.write('tom@'.encode())
+        s1.write('tom@'.encode())
         tom.play(volume)
 
     elif (is_drum(x, y, z, drum_locations['floor_points'])):
-        #s1.write('floor@'.encode())
+        s1.write('floor@'.encode())
         floor.play(volume)
 
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
-        #s1.write('ride@'.encode())
+        s1.write('ride@'.encode())
         ride.play(volume)
 
 
@@ -104,6 +105,8 @@ def main():
     debug = True
     record = False  #change to true if working with records
     center = deque(maxlen = 2)
+    center2 = deque(maxlen=1)
+
     center.appendleft((0,0))
     center.appendleft((0,0))
     frameCount = 0
@@ -112,6 +115,8 @@ def main():
     vs.startStream()
     leftStick = Stick("left",vs)
     rightStick = Stick("right",vs)
+    legStick = Stick("leg",vs, sensitivity=2)
+
     drums = Drums()
     #dictionary with drum boundaries
     #drum_locations = define_locations()
@@ -119,7 +124,7 @@ def main():
     graphicDrums = graphic_drums(vs=vs, drum_locations=drum_locations, is_debug=debug)
     vs.setUpdateBarFunc(graphicDrums.updateBar)
     time.sleep(1.0)
-    cap,s=graphicDrums.createTrackbar()
+    cap,s,s2=graphicDrums.createTrackbar()
 
     while True:
         graphicDrums.controlBar()
@@ -127,9 +132,13 @@ def main():
         is_captured, depth_frame, color_frame,raw_depth_frame = vs.get_frame()
         leftStick.setRawDepthFrame(raw_depth_frame)
         rightStick.setRawDepthFrame(raw_depth_frame)
+        legStick.setRawDepthFrame(raw_depth_frame)
         vs.color_frame = color_frame
         l=vs.objLower
         u=vs.objUpper
+        l2=vs.objLower_second
+        u2=vs.objUpper_second
+
 
         #removing background, may cause latency
         #fgMask = backSub.apply(color_frame)
@@ -137,20 +146,45 @@ def main():
 
          #important !!! to return it to code
         # Mask the image so the result is just the drum stick tips
-        mask, res = vs.find_color(color_frame)
+        mask, res, mask2, res2 = vs.find_color(color_frame)
         # Find contours in the mask
         cnts = vs.find_cnt(mask)
+        cnts2 = vs.find_cnt(mask2)
+
         ##### was commented until year in debug
         numSticks = min(len(cnts), 2)
+        numSticks2 = min(len(cnts2), 1)
+
         for i in range(numSticks):
             ((x, y), radius) = cv2.minEnclosingCircle(cnts[i]) #find a circle to enclose cnts[i]
             if (radius > 4):
                 center.appendleft((int(x),int(y)))
+
+        for i in range(numSticks2):
+            ((x2, y2), radius2) = cv2.minEnclosingCircle(cnts2[i])
+            if (radius2 > 4):
+                center2.appendleft((int(x2),int(y2)))
+
+        #center and center2 are updated
+
+        for i in range(numSticks2):
+            graphicDrums.add_circle(center2[i], (76, 76, 156))
+            legStick.addPoint(center2[i][0], center2[i][1])
+            if (frameCount > 4):
+                # distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
+                trackStick(legStick, drum_locations)
+                cv2.putText(color_frame, "{}mm".format(legStick.getZ()), (legStick.getX(), legStick.getY() ),
+                            cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+
+
+
+
         for i in range(numSticks):
             if (numSticks > 1):
                 if (center[i][0] <= center[(i + 1) % 2][0]): #check which center is left
                     #cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
                     graphicDrums.add_circle(center[i],(156, 76, 76))
+
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
 
@@ -182,8 +216,14 @@ def main():
                     #distance = vs.get_distance(rightStick.getX(), rightStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
                         trackStick(rightStick, drum_locations)
+
+
+
+
         graphicDrums.locate_drums_in_frame(color_frame)
-        graphicDrums.show_graphics(color_frame,depth_frame=depth_frame, res=res, mask=mask)
+        graphicDrums.show_graphics(color_frame,depth_frame=depth_frame, res=res, mask=mask,res2=res2,mask2=mask2)
+        #graphicDrums.show_graphics(color_frame, depth_frame=depth_frame, res=res2, mask=mask2)
+
         #key = cv2.waitKey(1) & 0xFF
         frameCount += 1
 
@@ -195,6 +235,6 @@ def main():
 
 
 if __name__== "__main__":
-   # s1 = serial.Serial('COM3', 9600)
+    s1 = serial.Serial('COM3', 9600)
     time.sleep(3)
     main()

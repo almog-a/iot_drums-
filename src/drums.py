@@ -13,9 +13,9 @@ class Drums:
 
         self.hihat_points = self.calculate_drum_size(290, 80)
         self.snare_points = self.calculate_drum_size(410, 205)
-        self.tom_points = self.calculate_drum_size(500, 280)
-        self.floor_points = self.calculate_drum_size(700, 280)
-        self.ride_points = self.calculate_drum_size(700, 280)
+        self.tom_points = self.calculate_drum_size(510, 205)
+        self.floor_points = self.calculate_drum_size(210, 205)
+        self.ride_points = self.calculate_drum_size(310, 205)
         self.kick_points = self.calculate_drum_size(424, 400)
 
     def calculate_drum_size(self,x ,y, z=0):

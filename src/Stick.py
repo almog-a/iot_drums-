@@ -4,7 +4,7 @@ import numpy as np
 import src.realsense_depth as rs
 
 class Stick:
-    def __init__(self, name,vs):
+    def __init__(self, name,vs ,sensitivity = 7):
         self.points = deque(maxlen = 4)
         self.minPoint = 480
         self.isGoingDown = False
@@ -12,7 +12,7 @@ class Stick:
         self.name = name
         self.raw_depth_frame=[]
         self.vs=vs
-
+        self.sensitivity = sensitivity
         self.points.appendleft((0, 0))
         self.points.appendleft((0, 0))
         self.points.appendleft((0, 0))
@@ -49,6 +49,7 @@ class Stick:
         return self.points
 
     def addPoint(self, x, y):
+
         z = self.findDepthByXY(x,y)
         #self.points.appendleft((x,y,z))
 
