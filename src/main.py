@@ -1,20 +1,14 @@
 from collections import deque
-from src.webcamvideostream import WebcamVideoStream
 from src.DrumSound import DrumSound
-from imutils.video import FileVideoStream
-from imutils.video import FPS
 from src.Stick import Stick
-import os
+from src.drums import Drums
 import numpy as np
-import argparse
 import cv2
-import imutils
 import time
-import simpleaudio as sa
 import src.realsense_depth as rs
 import serial
 
-from graphic_drums import graphic_drums
+from graphics import graphic_drums
 ##### taking care of imports
 #----------comment-----
 
@@ -31,11 +25,10 @@ ride = DrumSound("../audio/", "Ride", 5, ".wav")
 backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 
 
-
 def calculateVolume(stick) -> int:
     stick_acceleration = stick.getStickAcceleration()
     volume = 0
-    delta = 2000
+    delta=2000
     if stick_acceleration > 10000-delta:
         volume = 5
     elif stick_acceleration > 8000-delta:
@@ -68,44 +61,7 @@ def trackStick(stick, drum_locations):
         if np.abs(yDirection) > 10 and yDirection >= 0:
             stick.updateIsGoingDown(True)
     return
-'''
-def define_locations():
-    #define the points of all drums and return them
 
-    #snare_points = [(6, 0), (263, 99999), (0, 99999)]
-    #kick_points = [(359, 0), (625, 99999), (0, 9999)]
-
-
-    hihate_points = [(6, 150), (263, 350), (0, 99999)]
-    snare_points =[(359, 150), (625, 350), (0, 9999)]
-
-    kick_points = [(359, 390), (625, 100000), (0, 9999)]
-
-
-    return snare_points,kick_points,hihate_points;
-'''
-def locate_drums_in_frame(color_frame):
-    #locate the drums rectangles
-    snare_points,kick_points,hihat_points=define_locations()
-    snare=cv2.rectangle(color_frame, snare_points[0], snare_points[1], (0, 76, 76), 2)
-    cv2.putText(color_frame, "snare", (5, 150), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 76, 76), 2)
-    hihat = cv2.rectangle(color_frame, hihat_points[0], hihat_points[1], (255, 0, 0), 2)
-    cv2.putText(color_frame, "kick", (380, 150), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 0), 2)
-    kick = cv2.rectangle(color_frame, kick_points[0], kick_points[1], (255, 0, 0), 2)
-
-   # cv2.putText(color_frame, 'snare', (snare_points[0], snare_points[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
-    #kick=cv2.rectangle(img, kick_points[0], kick_points[1], (255, 0, 0), 2)
-    return
-'''
-def playDrumByPosition(x, y, volume):
-  #  s1.write('s'.encode())
-    if (x < 360):
-        kick.play(volume)
-    elif (x < 360):
-        snare.play(volume)
-    else:
-        hihat.play(volume)
-'''
 
 def is_drum(x,y,z,points):
     #return True
@@ -134,14 +90,16 @@ def main():
     center.appendleft((0,0))
     frameCount = 0
     file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
-    vs = rs.DepthCamera(record, file_name )
+    vs = rs.DepthCamera(record, file_name)
     vs.startStream()
     leftStick = Stick("left",vs)
     rightStick = Stick("right",vs)
-
+    drums = Drums()
     #dictionary with drum boundaries
-    drum_locations = define_locations()
+    #drum_locations = define_locations()
+    drum_locations = drums.get_locations()
     graphicDrums = graphic_drums(vs=vs, drum_locations=drum_locations, is_debug=debug)
+    vs.setUpdateBarFunc(graphicDrums.updateBar)
     time.sleep(1.0)
     cap,s=graphicDrums.createTrackbar()
 
@@ -173,7 +131,8 @@ def main():
         for i in range(numSticks):
             if (numSticks > 1):
                 if (center[i][0] <= center[(i + 1) % 2][0]): #check which center is left
-                    cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
+                    #cv2.circle(color_frame, center[i], 10, (156, 76, 76), 3)
+                    graphicDrums.add_circle(center[i],(156, 76, 76))
                     leftStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
 
@@ -182,7 +141,8 @@ def main():
                         cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getX() ,leftStick.getY()- 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
-                    cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
+                    #cv2.circle(color_frame, center[i], 10, (76,76,156), 3)
+                    graphicDrums.add_circle(center[i],(76,76,156))
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)

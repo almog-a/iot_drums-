@@ -5,25 +5,25 @@ import imutils
 
 #--
 class DepthCamera:
-    def __init__(self, run_record =False ,file_name='NO_FILE'):
+    def __init__(self,run_record =False,file_name='NO_FILE'):
         # Configure depth and color streams
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.run_record = run_record
         self.objLower = (30, 86, 14)
         self.objUpper = (97, 244, 255)
-
         self.calibrate_color = False  # if turn to True, will calibrate color according to next mouse click
         self.calibrate_points = []  # will contain calibration points.
         self.color_frame = []
+        self.updatebarFunc = None
         if not run_record:
         # Get device product line for setting a supporting resolution
             pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
             pipeline_profile = self.config.resolve(pipeline_wrapper)
             device = pipeline_profile.get_device()
             device_product_line = str(device.get_info(rs.camera_info.product_line))
-            self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-            self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+            self.config.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
+            self.config.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
 
         else:
             # Tell config that we will use a recorded device from file to be used by the pipeline through playback.
@@ -46,6 +46,7 @@ class DepthCamera:
                 continue
             else:
                 break
+
 
     def get_frame(self):
         frames = self.pipeline.wait_for_frames()
@@ -126,8 +127,8 @@ class DepthCamera:
         # this function is called after the user pick a point for calibration, and setting lower and upper coordinates
         # for color
 
-        delta = 2
-        delta1 = 10
+        delta = 0
+        delta1 = 0
 
         self.calibrate_points.append(hsv_color)
         self.objLower = (np.array(self.calibrate_points)).min(0) - np.array([delta, delta1, delta1])
@@ -145,10 +146,13 @@ class DepthCamera:
             hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
             if self.calibrate_color:
                 self.calibrateColor(hsv_color)
-                #self.updateBar()
-
-
-
+                self.updatebarFunc()
             print("HSV Format: ", hsv_color)
             print("BGR Format: ", colors)
             print("Coordinates of pixel: X: ", x, "Y: ", y)
+
+
+    def setUpdateBarFunc(self, func_to_save):
+        if(self.updatebarFunc != None):
+            raise Exception("updateBar for graphic class is already set")
+        self.updatebarFunc = func_to_save

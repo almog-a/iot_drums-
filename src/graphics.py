@@ -9,7 +9,8 @@ class graphic_drums:
         self.points_dict = drum_locations
         self.vs = vs
         self.is_debug = is_debug
-        cv2.namedWindow('Color Stream', cv2.WINDOW_AUTOSIZE)
+        self.circles = []
+        cv2.namedWindow('Color Stream', cv2.WND_PROP_FULLSCREEN)
         cv2.setMouseCallback('Color Stream', self.vs.mouseRGB)
 
     def __del__(self):
@@ -79,4 +80,11 @@ class graphic_drums:
             cv2.imshow("Depth Strem", depth_frame)
             cv2.imshow("res Strem", res)
             cv2.imshow("mask", mask)
+        for center,color in self.circles:
+            cv2.circle(color_frame, center, 10, color, 3)
         cv2.imshow("Color Stream", color_frame)
+        self.circles.clear()
+
+    def add_circle(self,center,color):
+        self.circles.append((center, color))
+
