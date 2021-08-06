@@ -49,14 +49,14 @@ def define_locations():
     return dict(hihat_points=hihat_points, snare_points=snare_points, kick_points=kick_points)
 
 
-def trackStick(stick, drum_locations):
+def trackStick(stick, drum_locations,isArduinoConnected):
 
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
         yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]  #last-current
         if (stick.getIsGoingDown() and yDirection < -stick.sensitivity):
             volume = calculateVolume(stick)
-            playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations)
+            playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations,isArduinoConnected)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
         if np.abs(yDirection) > stick.sensitivity and yDirection >= 0:
@@ -84,29 +84,34 @@ def is_drum(x,y,z,points):
             print(z)
         return False
 
-def playDrumByPosition(x,y,z,volume,drum_locations):
+
+
+def playDrumByPosition(x,y,z,volume,drum_locations,isArduinoConnected=0):
+    drumStr = ''
+
     if(is_drum(x,y,z,drum_locations['snare_points'])):
-        s1.write('snare@'.encode())
+        drumStr='snare@'
         snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
-        #s1.write('kick@'.encode())
+        drumStr = 'kick@'
         kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
-        s1.write('hihat@'.encode())
+        drumStr = 'hihat@'
         hihat.play(volume)
 
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
-        s1.write('tom@'.encode())
-        #tom.play(max((volume-2),0))
+        drumStr = 'tom@'
         tom.play(volume)
 
-    #elif (is_drum(x, y, z, drum_locations['floor_points'])):
-    #    s1.write('floor@'.encode())
-    #   floor.play(volume)
+    elif (is_drum(x, y, z, drum_locations['floor_points'])):
+        drumStr = 'floor@'
+        floor.play(volume)
 
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
-        s1.write('ride@'.encode())
+        drumStr = 'ride@'
         ride.play(volume)
+    if (drumStr!='') and (isArduinoConnected): s1.write(drumStr.encode)
+
 
 
 def main():
@@ -135,6 +140,12 @@ def main():
     vs.setUpdateBarFunc(graphicDrums.updateBar)
     time.sleep(1.0)
     cap,s,s2=graphicDrums.createTrackbar()
+    isArduinoConnected=0 #choose if arduino is in use
+
+    if(isArduinoConnected):
+        s1 = serial.Serial('COM3', 9600)
+        time.sleep(3)
+
 
     while True:
         graphicDrums.controlBar()
@@ -182,7 +193,7 @@ def main():
             legStick.addPoint(center2[i][0], center2[i][1])
             if (frameCount > 4):
                 # distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                trackStick(legStick, drum_locations)
+                trackStick(legStick, drum_locations,isArduinoConnected)
                 cv2.putText(color_frame, "{}mm".format(legStick.getZ()), (legStick.getX(), legStick.getY() ),
                             cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
@@ -199,7 +210,7 @@ def main():
                     if (frameCount > 4):
 
                         #distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        trackStick(leftStick, drum_locations)
+                        trackStick(leftStick, drum_locations,isArduinoConnected)
                         cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getX() ,leftStick.getY()- 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
@@ -208,7 +219,7 @@ def main():
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        trackStick(rightStick, drum_locations)
+                        trackStick(rightStick, drum_locations,isArduinoConnected)
                         cv2.putText(color_frame, "{}mm".format(rightStick.getZ()), (rightStick.getX() ,rightStick.getY() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
@@ -219,13 +230,13 @@ def main():
                     leftStick.addPoint(center[i][0], center[i][1])
                     #distance = vs.get_distance(leftStick.getX(), leftStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(leftStick, drum_locations)
+                        trackStick(leftStick, drum_locations,isArduinoConnected)
 
                 else:
                     rightStick.addPoint(center[i][0], center[i][1])
                     #distance = vs.get_distance(rightStick.getX(), rightStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(rightStick, drum_locations)
+                        trackStick(rightStick, drum_locations,isArduinoConnected)
 
 
 
@@ -245,6 +256,5 @@ def main():
 
 
 if __name__== "__main__":
-    s1 = serial.Serial('COM3', 9600)
-    time.sleep(3)
+
     main()
