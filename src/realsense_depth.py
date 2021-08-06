@@ -2,7 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import imutils
-
+import files_calibration
 #--
 class DepthCamera:
     def __init__(self,run_record =False,file_name='NO_FILE'):
@@ -10,10 +10,12 @@ class DepthCamera:
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.run_record = run_record
-        self.objLower = (58, 178, 81) #green lower
-        self.objUpper = (77, 255, 133) #green upper
-        self.objLower_second = (30, 240, 220) #red lower
-        self.objUpper_second = (0, 255, 230) #red upper
+        self.objLower,self.objUpper=files_calibration.get_calibration_from_file("1_color_calibration.txt")
+        self.objLower_second,self.objUpper_second=files_calibration.get_calibration_from_file("2_color_calibration.txt")
+        #self.objLower = (58, 178, 81) #green lower
+        #self.objUpper = (77, 255, 133) #green upper
+        #self.objLower_second = (30, 240, 220) #red lower
+        #self.objUpper_second = (0, 255, 230) #red upper
 
 
 
@@ -43,6 +45,8 @@ class DepthCamera:
     def startStream(self):
         # Start streaming
         self.pipeline.start(self.config)
+        sensor = self.pipeline.get_active_profile().get_device().query_sensors()[1]
+        #sensor.set_option(rs.option.saturation, 100)
         #wait for a coherent color and depth picture
         while True:
             frames = self.pipeline.wait_for_frames()
@@ -53,6 +57,9 @@ class DepthCamera:
                 continue
             else:
                 break
+
+
+
 
 
     def get_frame(self):
@@ -85,6 +92,10 @@ class DepthCamera:
                 key = cv2.waitKey(1)
                 if key == ord(" "):
                     break
+        elif key==ord("s"): #save calibration to file
+            files_calibration.set_calibration_to_file("1_color_calibration.txt",self.objLower,self.objUpper)
+            files_calibration.set_calibration_to_file("2_color_calibration.txt",self.objLower_second,self.objUpper_second)
+
         elif key == ord("c"): #calibrate color
             self.calibrate_points = []
             self.calibrate_color = True #starting the calibrating process

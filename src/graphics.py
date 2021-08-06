@@ -123,8 +123,8 @@ class graphic_drums:
         tom = cv2.rectangle(color_frame, tom_points[0], tom_points[1], (0, 120, 255), 2)
         cv2.putText(color_frame, "tom", tom_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 120, 255), 2)
 
-        floor = cv2.rectangle(color_frame, floor_points[0], floor_points[1], (0, 255, 0), 2)
-        cv2.putText(color_frame, "floor", floor_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 0), 2)
+        #floor = cv2.rectangle(color_frame, floor_points[0], floor_points[1], (0, 255, 0), 2)
+        #cv2.putText(color_frame, "floor", floor_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 0), 2)
 
         ride = cv2.rectangle(color_frame, ride_points[0], ride_points[1], (255, 0, 255), 2)
         cv2.putText(color_frame, "ride", ride_points[0], cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255, 0, 255), 2)

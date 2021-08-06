@@ -73,16 +73,23 @@ def is_drum(x,y,z,points):
     # down_y:177, up_y: 337, right_x:263, up_y=337
 
     #up_y is ok and down has problems!!
-    if (x < right_x) and (x > left_x) and (y < up_y+30) and (y > down_y-55):  # and (z < far_z) and (z > close_z):
-        return True
-    return False
+    #if (x < right_x) and (x > left_x) and (y < up_y+30) and (y > down_y-55) and (z < far_z) and (z > close_z):
+        #return True
+    if (x < right_x) and (x > left_x) and (y < up_y + 30) and (y > down_y - 55):
+        print(x,y)
+        if (z < far_z) and (z > close_z):
+            return True
+        else:
+            print('miss')
+            print(z)
+        return False
 
 def playDrumByPosition(x,y,z,volume,drum_locations):
     if(is_drum(x,y,z,drum_locations['snare_points'])):
         s1.write('snare@'.encode())
         snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
-        s1.write('kick@'.encode())
+        #s1.write('kick@'.encode())
         kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
         s1.write('hihat@'.encode())
@@ -90,11 +97,12 @@ def playDrumByPosition(x,y,z,volume,drum_locations):
 
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
         s1.write('tom@'.encode())
+        #tom.play(max((volume-2),0))
         tom.play(volume)
 
-    elif (is_drum(x, y, z, drum_locations['floor_points'])):
-        s1.write('floor@'.encode())
-        floor.play(volume)
+    #elif (is_drum(x, y, z, drum_locations['floor_points'])):
+    #    s1.write('floor@'.encode())
+    #   floor.play(volume)
 
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
         s1.write('ride@'.encode())
@@ -109,13 +117,15 @@ def main():
 
     center.appendleft((0,0))
     center.appendleft((0,0))
+    center2.appendleft((0,0))
+
     frameCount = 0
     file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
     vs = rs.DepthCamera(record, file_name)
     vs.startStream()
     leftStick = Stick("left",vs)
     rightStick = Stick("right",vs)
-    legStick = Stick("leg",vs, sensitivity=2)
+    legStick = Stick("leg",vs, sensitivity=5)
 
     drums = Drums()
     #dictionary with drum boundaries
