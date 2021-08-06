@@ -40,6 +40,22 @@
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QSlider" name="songVolumeSlider">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>520</y>
+      <width>160</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>50</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

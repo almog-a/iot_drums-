@@ -103,9 +103,7 @@ class DepthCamera:
             files_calibration.set_calibration_to_file("2_color_calibration.txt",self.objLower_second,self.objUpper_second)
 
         elif key == ord("c"): #calibrate color
-            self.calibrate_points = []
-            self.calibrate_color = True #starting the calibrating process
-            self.calibrate_type = "c"
+            self.calibrate_sticks()
 
         elif key == ord("x"):  # calibrate color
             self.calibrate_points = []
@@ -200,19 +198,7 @@ class DepthCamera:
 
     def mouseRGB(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
-            #colorsB = self.color_frame[y, x, 0]
-            #colorsG = self.color_frame[y, x, 1]
-            #colorsR = self.color_frame[y, x, 2]
-            colors = self.color_frame[y, x]
-            hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
-            if self.calibrate_color:
-                self.calibrateColor(hsv_color)
-                self.updatebarFunc()
-
-
-            print("HSV Format: ", hsv_color)
-            print("BGR Format: ", colors)
-            print("Coordinates of pixel: X: ", x, "Y: ", y)
+            self.calibrate_callback(x,y)
 
     def calibrate_callback(self,x,y):
         colors = self.color_frame[y, x]
@@ -230,7 +216,7 @@ class DepthCamera:
             raise Exception("updateBar for graphic class is already set")
         self.updatebarFunc = func_to_save
 
-    def calibrate_stics(self):
+    def calibrate_sticks(self):
         self.calibrate_points = []
         self.calibrate_color = True  # starting the calibrating process
         self.calibrate_type = "c"

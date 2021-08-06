@@ -9,7 +9,7 @@ Last edited: 21 Feb 2018
 import sys
 
 # import some PyQt5 modules
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog ,QSlider
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QPixmap
@@ -39,13 +39,18 @@ class MainWindow(QMainWindow):
         self.ui.start_bt.clicked.connect(self.controlTimer)
         self.iot = self.init_iot_drums()
         self.ui.actionPlay_Song.triggered.connect(self.playSong)
-        self.ui.actionCalibrate.triggered.connect(self.iot.vs.calibrate_stics)
+        self.ui.actionCalibrate.triggered.connect(self.iot.vs.calibrate_sticks)
+        self.player = QtMultimedia.QMediaPlayer()
+        self.initGui()
 
+    def initGui(self):
+        self.ui.songVolumeSlider.valueChanged[int].connect(self.changeVolume)
 
     def init_iot_drums(self):
         return iot.iot_drums()
 
-
+    def changeVolume(self, value):
+        self.player.setVolume(value)
             # view camera
     # def viewCam(self):
     #     # read image in BGR format
@@ -75,12 +80,7 @@ class MainWindow(QMainWindow):
     def getPixel(self, event):
         x = event.pos().x()
         y = event.pos().y()
-        # c = self.img.pixel(x, y)  # color code (integer): 3235912
-        # # depending on what kind of value you like (arbitary examples)
-        # c_qobj = QColor(c)  # color object
-        # c_rgb = QColor(c).getRgb()  # 8bit RGBA: (255, 23, 0, 255)
-        # c_rgbf = QColor(c).getRgbf()  # RGBA float: (1.0, 0.3123, 0.0, 1.0)
-        print (x, y)#, c_rgb)
+        self.iot.vs.calibrate_callback(x,y)
 
 
     # start/stop timer
@@ -111,10 +111,9 @@ class MainWindow(QMainWindow):
             print(files)
             url = QtCore.QUrl.fromLocalFile(*files)
             content = QtMultimedia.QMediaContent(url)
-            player = QtMultimedia.QMediaPlayer()
-            player.setMedia(content)
-            player.play()
-
+            self.player.setMedia(content)
+            self.player.play()
+            self.player.setVolume(int(self.ui.songVolumeSlider.value()))
 
 
 if __name__ == '__main__':
