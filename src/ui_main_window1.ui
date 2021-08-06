@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1332</width>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,19 +27,6 @@
      <string>start</string>
     </property>
    </widget>
-   <widget class="QLabel" name="stream1">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>10</y>
-      <width>571</width>
-      <height>491</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
    <widget class="QSlider" name="songVolumeSlider">
     <property name="geometry">
      <rect>
@@ -56,13 +43,39 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
+   <widget class="QLabel" name="stream2">
+    <property name="geometry">
+     <rect>
+      <x>662</x>
+      <y>20</y>
+      <width>641</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="stream1">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>641</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1332</width>
      <height>21</height>
     </rect>
    </property>
@@ -71,7 +84,9 @@
      <string>Set Up</string>
     </property>
     <addaction name="actionCalibrate"/>
+    <addaction name="actionCalibrate_Leg"/>
     <addaction name="actionFinish_Sticks_Calibration"/>
+    <addaction name="actionSave_Calibration"/>
     <addaction name="actionPlay_Song"/>
    </widget>
    <addaction name="menuSet_Up"/>
@@ -87,7 +102,7 @@
   </action>
   <action name="actionFinish_Sticks_Calibration">
    <property name="text">
-    <string>Finish Sticks Calibration</string>
+    <string>Finish Calibration</string>
    </property>
    <property name="shortcut">
     <string>F</string>
@@ -96,6 +111,22 @@
   <action name="actionPlay_Song">
    <property name="text">
     <string>Play Song</string>
+   </property>
+  </action>
+  <action name="actionCalibrate_Leg">
+   <property name="text">
+    <string>Calibrate Leg</string>
+   </property>
+   <property name="shortcut">
+    <string>X</string>
+   </property>
+  </action>
+  <action name="actionSave_Calibration">
+   <property name="text">
+    <string>Save Calibration</string>
+   </property>
+   <property name="shortcut">
+    <string>S</string>
    </property>
   </action>
  </widget>

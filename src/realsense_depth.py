@@ -64,10 +64,6 @@ class DepthCamera:
             else:
                 break
 
-
-
-
-
     def get_frame(self):
         frames = self.pipeline.wait_for_frames()
         raw_depth_frame = frames.get_depth_frame()
@@ -99,22 +95,16 @@ class DepthCamera:
                 if key == ord(" "):
                     break
         elif key==ord("s"): #save calibration to file
-            files_calibration.set_calibration_to_file("1_color_calibration.txt",self.objLower,self.objUpper)
-            files_calibration.set_calibration_to_file("2_color_calibration.txt",self.objLower_second,self.objUpper_second)
+            self.save_calibration()
 
         elif key == ord("c"): #calibrate color
             self.calibrate_sticks()
 
         elif key == ord("x"):  # calibrate color
-            self.calibrate_points = []
-            self.calibrate_color = True  # starting the calibrating process
-            self.calibrate_type = "x"
-
+            self.calibrate_leg()
 
         elif key == ord("f"):  # finish calibrate color
-            self.calibrate_color = False
-            self.calibrate_type = "n"
-            self.calibrate_points = []  # initializing points for next calibration
+            self.finish_calibrate()
 
         return flag
 
@@ -220,3 +210,17 @@ class DepthCamera:
         self.calibrate_points = []
         self.calibrate_color = True  # starting the calibrating process
         self.calibrate_type = "c"
+
+    def finish_calibrate(self):
+        self.calibrate_color = False
+        self.calibrate_type = "n"
+        self.calibrate_points = []  # initializing points for next calibration
+
+    def calibrate_leg(self):
+        self.calibrate_points = []
+        self.calibrate_color = True  # starting the calibrating process
+        self.calibrate_type = "x"
+
+    def save_calibration(self):
+        files_calibration.set_calibration_to_file("1_color_calibration.txt", self.objLower, self.objUpper)
+        files_calibration.set_calibration_to_file("2_color_calibration.txt", self.objLower_second, self.objUpper_second)

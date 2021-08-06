@@ -34,48 +34,49 @@ class MainWindow(QMainWindow):
         # create a timer
         self.timer = QTimer()
         # set timer timeout callback function
-        self.timer.timeout.connect(self.viewCam)
+        self.timer.timeout.connect(self.putStream)
         # set control_bt callback clicked  function
-        self.ui.start_bt.clicked.connect(self.controlTimer)
         self.iot = self.init_iot_drums()
-        self.ui.actionPlay_Song.triggered.connect(self.playSong)
-        self.ui.actionCalibrate.triggered.connect(self.iot.vs.calibrate_sticks)
         self.player = QtMultimedia.QMediaPlayer()
         self.initGui()
 
     def initGui(self):
+        self.ui.start_bt.clicked.connect(self.controlTimer)
+        self.ui.actionPlay_Song.triggered.connect(self.playSong)
+        self.ui.actionCalibrate.triggered.connect(self.iot.vs.calibrate_sticks)
         self.ui.songVolumeSlider.valueChanged[int].connect(self.changeVolume)
+        self.ui.actionCalibrate_Leg.triggered.connect(self.iot.vs.calibrate_leg)
+        self.ui.actionSave_Calibration.triggered.connect(self.iot.vs.save_calibration)
+        self.ui.actionFinish_Sticks_Calibration.triggered.connect(self.iot.vs.finish_calibrate)
+
 
     def init_iot_drums(self):
         return iot.iot_drums()
 
     def changeVolume(self, value):
         self.player.setVolume(value)
-            # view camera
-    # def viewCam(self):
-    #     # read image in BGR format
-    #     ret, image = self.cap.read()
-    #     # convert image to RGB format
-    #     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    #     # get image infos
-    #     height, width, channel = image.shape
-    #     step = channel * width
-    #     # create QImage from image
-    #     qImg = QImage(image.data, width, height, step, QImage.Format_RGB888)
-    #     # show image in img_label
-    #     self.ui.image_label.setPixmap(QPixmap.fromImage(qImg))
 
-    def viewCam(self):
-        self.iot.iteration()
-        color_frame = self.iot.vs.color_frame
+
+    def putStream(self):
+        color_frame, res = self.iot.iteration()
+        color_frame = cv2.cvtColor(color_frame, cv2.COLOR_BGR2RGB)
+        res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
 
         height, width, channel = color_frame.shape
         step = channel * width
         # create QImage from image
-        qImg = QImage(color_frame.data, width, height, step, QImage.Format_RGB888)
+        qImg_stream1 = QImage(color_frame.data, width, height, step, QImage.Format_RGB888)
+        qImg_stream2 = QImage(res.data, width, height, step, QImage.Format_RGB888)
         # show image in img_label
-        self.ui.stream1.setPixmap(QPixmap.fromImage(qImg))
+        self.ui.stream1.setPixmap(QPixmap.fromImage(qImg_stream1))
         self.ui.stream1.mousePressEvent = self.getPixel
+
+        self.ui.stream2.setPixmap(QPixmap.fromImage(qImg_stream2))
+        #for expanding
+        #self.ui.stream1.setScaledContents(True)
+        #self.ui.stream1.setSizePolicy(QtWidgets.QSizePolicy.Ignored,QtWidgets.QSizePolicy.Ignored)
+
+
 
     def getPixel(self, event):
         x = event.pos().x()

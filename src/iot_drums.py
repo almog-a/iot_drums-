@@ -76,7 +76,7 @@ def is_drum(x,y,z,points):
     #if (x < right_x) and (x > left_x) and (y < up_y+30) and (y > down_y-55) and (z < far_z) and (z > close_z):
         #return True
     if (x < right_x) and (x > left_x) and (y < up_y + 30) and (y > down_y - 55):
-        print(x,y)
+        #print(x,y)
         if (z < far_z) and (z > close_z):
             return True
         else:
@@ -239,7 +239,7 @@ class iot_drums:
         #key = cv2.waitKey(1) & 0xFF
         self.frameCount += 1
 
-        self.vs.color_frame = color_frame
+        return color_frame, res
 
         # if the 'Esc' key is pressed, quit
         #if vs.keyUI():
