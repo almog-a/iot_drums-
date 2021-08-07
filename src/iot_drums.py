@@ -144,7 +144,7 @@ class iot_drums:
         # pm here choose if connect midi!
 
         self.debug = True
-        self.record = False  #change to true if working with records
+        self.record = True  #change to true if working with records
         self.center = deque(maxlen = 2)
         self.center2 = deque(maxlen=1)
 
@@ -173,9 +173,6 @@ class iot_drums:
         if isArduinoConnected:
             self.pm.arduino_config(isArduinoConnected)
 
-        if isArduinoConnected:
-            s1 = serial.Serial('COM3', 9600)
-            time.sleep(3)
 
 
     def iteration(self):

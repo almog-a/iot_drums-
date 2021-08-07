@@ -19,17 +19,33 @@ class play_midi:
 
          #Attempt to open the port
         if self.is_midi:
-            if available_ports:
-                self.midiout.open_port(2)
-            else:
-                self.midiout.open_virtual_port("My virtual output")
+            self.open_port()
+            # if available_ports:
+            #     self.midiout.open_port(2)
+            # else:
+            #     self.midiout.open_virtual_port("My virtual output")
+
+    def open_port(self):
+        available_ports = self.midiout.get_ports()
+        if available_ports:
+            self.midiout.open_port(2)
+        else:
+            self.midiout.open_virtual_port("My virtual output")
+
+    def close_port(self):
+        self.midiout.close_port()
+
 
     def arduino_config(self, flag):
         self.is_arduino_connected = flag
         if (self.is_arduino_connected):
-            self.s1 = serial.Serial('COM3', 9600)
+            self.s1 = serial.Serial('COM4', 9600)
             time.sleep(3)
             return self.s1
+
+    def close_arduino(self):
+        self.is_arduino_connected = False
+        self.s1.close()
 
     def get_is_arduino_connected(self):
         return self.is_arduino_connected
