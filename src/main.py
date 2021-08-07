@@ -28,8 +28,9 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 def calculateVolume(stick) -> int:
 
     stick_acceleration = stick.getStickAcceleration()
-    print("stick acceleration")
-    print(stick_acceleration)
+    # print("stick acceleration")
+    # print(stick_acceleration)
+    midi_volume=0
     volume = 0
     delta=2000
     if stick_acceleration > 10000-delta:
@@ -42,8 +43,11 @@ def calculateVolume(stick) -> int:
         volume = 2
     elif stick_acceleration > 2000-delta:
         volume = 1
+
     if(stick_acceleration>2000-delta):
         midi_velocity=(stick_acceleration/10000)*127
+
+
     else:
         midi_velocity=0
     return volume,midi_velocity

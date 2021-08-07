@@ -21,7 +21,9 @@ class play_midi:
             self.midiout.open_virtual_port("My virtual output")
 
     def set_current_velocity(self,current_val):
-        self.current_velocity=min(current_val*4,127)
+        self.current_velocity=min(current_val,127)
+        if(self.current_velocity<15):
+            self.current_velocity=self.current_velocity*2
 
 
     def play_hihate(self,velocity=100):
