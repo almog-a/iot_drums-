@@ -140,7 +140,7 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
 class iot_drums:
 
     def __init__(self):
-        self.pm = play_midi.play_midi(True)
+        self.pm = play_midi.play_midi(False)
         # pm here choose if connect midi!
 
         self.debug = True

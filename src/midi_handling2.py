@@ -5,7 +5,7 @@ import time
 
 
 class play_midi:
-    def __init__(self, is_midi):
+    def __init__(self, is_midi=False):
         self.is_midi = is_midi
         self.midiout = rtmidi.MidiOut()
         self.time_sleep=0.05
@@ -13,6 +13,7 @@ class play_midi:
         available_ports = self.midiout.get_ports()
         self.current_velocity=80
         self.is_arduino_connected=False
+        self.port = []
         # here we're printing the ports to check that we see the one that loopMidi created.
         # In the list we should see a port called "loopMIDI port".
         print(available_ports)
@@ -28,12 +29,12 @@ class play_midi:
     def open_port(self):
         available_ports = self.midiout.get_ports()
         if available_ports:
-            self.midiout.open_port(2)
+            self.port = self.midiout.open_port(2)
         else:
-            self.midiout.open_virtual_port("My virtual output")
+            self.port = self.midiout.open_virtual_port("My virtual output")
 
     def close_port(self):
-        self.midiout.close_port()
+        self.port.close_port()
 
 
     def arduino_config(self, flag):
