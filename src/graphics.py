@@ -7,6 +7,7 @@ class graphic_drums:
 
     def __init__(self, vs:DepthCamera, drum_locations, is_debug = False):
         self.points_dict = drum_locations
+
         self.vs = vs
         self.is_debug = is_debug
         self.circles = []
@@ -101,6 +102,7 @@ class graphic_drums:
         cv2.setTrackbarPos("U - H   2", s2, self.vs.objUpper_second[0])
         cv2.setTrackbarPos("U - S   2", s2, self.vs.objUpper_second[1])
         cv2.setTrackbarPos("U - V   2", s2, self.vs.objUpper_second[2])
+
 
     def locate_drums_in_frame(self, color_frame):
         # locate the drums rectangles

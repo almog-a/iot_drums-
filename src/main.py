@@ -45,7 +45,7 @@ def calculateVolume(stick) -> int:
         volume = 1
 
     if(stick_acceleration>2000-delta):
-        midi_velocity=(stick_acceleration/5000)*127
+        midi_velocity=(stick_acceleration/7000)*127
 
 
     else:
@@ -138,10 +138,9 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
 
 
 def main():
-    pm = play_midi.play_midi()
-    #pm here choose if connect midi!
     midi_flag=True
-    pm.set_midi_flag(midi_flag)
+    pm = play_midi.play_midi(midi_flag)
+    #pm here choose if connect midi!
 
     debug = True
     record = False  #change to true if working with records

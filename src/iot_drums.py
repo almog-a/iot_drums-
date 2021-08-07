@@ -45,7 +45,7 @@ def calculateVolume(stick) -> int:
         volume = 1
 
     if(stick_acceleration>2000-delta):
-        midi_velocity=(stick_acceleration/10000)*127
+        midi_velocity=(stick_acceleration/5000)*127
 
 
     else:
@@ -68,7 +68,8 @@ def trackStick(pm,stick, drum_locations):
         if (stick.getIsGoingDown() and yDirection < -stick.sensitivity):
             volume,midi_velocity = calculateVolume(stick)
             pm.set_current_velocity(midi_velocity)
-            playDrumByPosition(pm,stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations)
+            if (stick.isCloseEnough()):
+                playDrumByPosition(pm, stick.getX(), stick.getY(), stick.getZ(), volume, drum_locations)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
         if np.abs(yDirection) > stick.sensitivity and yDirection >= 0:
@@ -139,7 +140,7 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
 class iot_drums:
 
     def __init__(self):
-        self.pm = play_midi.play_midi(False)
+        self.pm = play_midi.play_midi(True)
         # pm here choose if connect midi!
 
         self.debug = True

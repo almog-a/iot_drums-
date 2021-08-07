@@ -69,7 +69,7 @@ class Stick:
         cur_point=(x,y)
 
         dist=np.sqrt((cur_point[0] - prev_point[0]) ** 2 + (cur_point[1] - prev_point[1]) ** 2)
-        if (dist>25):self.isSound=False
+        if (dist>45):self.isSound=False
         else: self.isSound=True
 
     def getX(self):
