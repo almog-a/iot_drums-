@@ -54,9 +54,9 @@ def calculateVolume(stick) -> int:
 
 
 def define_locations():
-    hihat_points = [(6, 150), (263, 350), (0, 99999)]
-    snare_points =[(359, 150), (625, 350), (0, 9999)]
-    kick_points = [(359, 390), (625, 100000), (0, 9999)]
+    hihat_points = [(6, 150), (263, 350), (800, 1200)]
+    snare_points =[(359, 150), (625, 350), (800, 1200)]
+    kick_points = [(359, 390), (625, 100000), (800, 1200)]
     return dict(hihat_points=hihat_points, snare_points=snare_points, kick_points=kick_points)
 
 
@@ -90,7 +90,7 @@ def is_drum(x,y,z,points):
         #return True
     if (x < right_x) and (x > left_x) and (y < up_y + 30) and (y > down_y - 55):
         print(x,y)
-        return True
+        #return True
         if (z < far_z) and (z > close_z):
             return True
         else:
@@ -106,34 +106,34 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
     flag=pm.get_midi_flag()
 
     if(is_drum(x,y,z,drum_locations['snare_points'])):
-        drumStr='s'
+        drumStr='snare@'
         if (flag): pm.play_snare(pm.current_velocity)
         else:
             snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
-        drumStr = 'k'
+        drumStr = 'kick@'
         if (flag):pm.play_kick(pm.current_velocity)
         else: kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
-        drumStr = 'h'
+        drumStr = 'hihat@'
 
         if (flag): pm.play_hihate(pm.current_velocity)
         else: hihat.play(volume)
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
-        drumStr = 't'
-
+        drumStr = 'tom@'
         if(flag): pm.play_tom(pm.current_velocity)
         else: tom.play(volume)
     elif (is_drum(x, y, z, drum_locations['floor_points'])):
-        drumStr = 'f'
+        drumStr = 'floor@'
         if(flag):pm.play_floor(pm.current_velocity)
         else: floor.play(volume)
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
-        drumStr = 'r'
+        drumStr = 'ride@'
         if (flag): pm.play_ride(pm.current_velocity)
         else: ride.play(volume)
 
-    if (drumStr!='') and (pm.is_arduino_connected): pm.get_s1().write(drumStr.encode)
+    if (drumStr!='') and (pm.is_arduino_connected):
+        pm.get_s1().write(drumStr.encode())
 
 
 
@@ -144,7 +144,7 @@ class iot_drums:
         # pm here choose if connect midi!
 
         self.debug = True
-        self.record = True  #change to true if working with records
+        self.record = False  #change to true if working with records
         self.center = deque(maxlen = 2)
         self.center2 = deque(maxlen=1)
 

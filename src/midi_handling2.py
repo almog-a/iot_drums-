@@ -39,7 +39,7 @@ class play_midi:
     def arduino_config(self, flag):
         self.is_arduino_connected = flag
         if (self.is_arduino_connected):
-            self.s1 = serial.Serial('COM4', 9600)
+            self.s1 = serial.Serial('COM3', 9600)
             time.sleep(3)
             return self.s1
 

@@ -9,9 +9,9 @@ class Drums:
         self.pixel_ratio = pixel_ratio
         self.drums_width = 25 #size of drums in cm
         self.drums_height = 25
-        self.drums_depth = 99999
+        self.drums_depth = 60 #cm
 
-        self.default_depth=99999
+        self.default_depth=1400 #mm , farest z point
         self.default_depth2 = 99999
         #self.hihat_points = self.calculate_drum_size(290, 80,self.default_depth) before change
         self.hihat_points = self.calculate_drum_size(235, 80, self.default_depth) #after change
@@ -21,7 +21,7 @@ class Drums:
         self.floor_points = self.calculate_drum_size(210, 205,self.default_depth)
         #self.ride_points = self.calculate_drum_size(310, 205,self.default_depth)
         self.ride_points = self.calculate_drum_size( 470, 80, self.default_depth)
-        self.kick_points = self.calculate_drum_size(424, 400,1450)
+        self.kick_points = self.calculate_drum_size(424, 400,1500)
 
     def calculate_drum_size(self,x ,y, z=0):
         return [(x, y), (x+int(self.drums_width*self.pixel_ratio), y+int(self.drums_height*self.pixel_ratio)), (z-self.drums_depth*10,z )]

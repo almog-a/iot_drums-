@@ -106,34 +106,34 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
     flag=pm.get_midi_flag()
 
     if(is_drum(x,y,z,drum_locations['snare_points'])):
-        drumStr='s'
+        drumStr='snare@'
         if (flag): pm.play_snare(pm.current_velocity)
         else:
             snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
-        drumStr = 'k'
+        drumStr = 'kick@'
         if (flag):pm.play_kick(pm.current_velocity)
         else: kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
-        drumStr = 'h'
+        drumStr = 'hihat@'
 
         if (flag): pm.play_hihate(pm.current_velocity)
         else: hihat.play(volume)
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
-        drumStr = 't'
+        drumStr = 'tom@'
 
         if(flag): pm.play_tom(pm.current_velocity)
         else: tom.play(volume)
     elif (is_drum(x, y, z, drum_locations['floor_points'])):
-        drumStr = 'f'
+        drumStr = 'floor@'
         if(flag):pm.play_floor(pm.current_velocity)
         else: floor.play(volume)
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
-        drumStr = 'r'
+        drumStr = 'ride@'
         if (flag): pm.play_ride(pm.current_velocity)
         else: ride.play(volume)
 
-    if (drumStr!='') and (pm.is_arduino_connected): pm.get_s1().write(drumStr.encode)
+    if (drumStr!='') and (pm.is_arduino_connected): pm.get_s1().write(drumStr.encode())
 
 
 
