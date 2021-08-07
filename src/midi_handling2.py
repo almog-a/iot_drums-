@@ -43,7 +43,7 @@ class play_midi:
 
     def set_current_velocity(self,current_val):
         self.current_velocity=min(current_val,127)
-        if(self.current_velocity<15):
+        if(self.current_velocity<8):
             self.current_velocity=self.current_velocity*2
 
 

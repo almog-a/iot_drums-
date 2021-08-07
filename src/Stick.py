@@ -17,9 +17,13 @@ class Stick:
         self.points.appendleft((0, 0,0))
         self.points.appendleft((0, 0,0))
         self.points.appendleft((0, 0,0))
+        self.isSound=True
 
     def setRawDepthFrame(self,raw_depth_frame):
         self.raw_depth_frame=raw_depth_frame
+
+    def isCloseEnough(self):
+        return self.isSound
 
     def getName(self):
         return self.name
@@ -54,13 +58,19 @@ class Stick:
         return self.points
 
     def addPoint(self, x, y):
-
+        prev_point = (self.getX(), self.getY())
         z = self.findDepthByXY(x,y)
         #self.points.appendleft((x,y,z))
         if z == 0:
             z = self.points[0][2]
         #if len(self.points) != 0 and (x, y) != (self.points[0][0], self.points[0][1]):
         self.points.appendleft((x,y,z))
+
+        cur_point=(x,y)
+
+        dist=np.sqrt((cur_point[0] - prev_point[0]) ** 2 + (cur_point[1] - prev_point[1]) ** 2)
+        if (dist>25):self.isSound=False
+        else: self.isSound=True
 
     def getX(self):
         return self.points[0][0]
