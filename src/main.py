@@ -60,7 +60,7 @@ def define_locations():
     return dict(hihat_points=hihat_points, snare_points=snare_points, kick_points=kick_points)
 
 
-def trackStick(pm,stick, drum_locations,isArduinoConnected):
+def trackStick(pm,stick, drum_locations):
 
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
@@ -68,7 +68,7 @@ def trackStick(pm,stick, drum_locations,isArduinoConnected):
         if (stick.getIsGoingDown() and yDirection < -stick.sensitivity):
             volume,midi_velocity = calculateVolume(stick)
             pm.set_current_velocity(midi_velocity)
-            playDrumByPosition(pm,stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations,isArduinoConnected)
+            playDrumByPosition(pm,stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
         if np.abs(yDirection) > stick.sensitivity and yDirection >= 0:
@@ -89,6 +89,7 @@ def is_drum(x,y,z,points):
         #return True
     if (x < right_x) and (x > left_x) and (y < up_y + 30) and (y > down_y - 55):
         print(x,y)
+        return True
         if (z < far_z) and (z > close_z):
             return True
         else:
@@ -98,41 +99,49 @@ def is_drum(x,y,z,points):
 
 
 
-def playDrumByPosition(pm,x,y,z,volume,drum_locations,isArduinoConnected=0):
-    drumStr = ''
+def playDrumByPosition(pm,x,y,z,volume,drum_locations):
 
+    drumStr = ''
+    flag=pm.get_midi_flag()
 
     if(is_drum(x,y,z,drum_locations['snare_points'])):
         drumStr='s'
-        pm.play_snare(pm.current_velocity)
-        #snare.play(volume)
+        if (flag): pm.play_snare(pm.current_velocity)
+        else:
+            snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
         drumStr = 'k'
-        pm.play_kick(pm.current_velocity)
-        #kick.play(volume)
+        if (flag):pm.play_kick(pm.current_velocity)
+        else: kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
         drumStr = 'h'
-        #hihat.play(volume)
-        pm.play_hihate(pm.current_velocity)
+
+        if (flag): pm.play_hihate(pm.current_velocity)
+        else: hihat.play(volume)
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
         drumStr = 't'
-        #tom.play(volume)
-        pm.play_tom(pm.current_velocity)
+
+        if(flag): pm.play_tom(pm.current_velocity)
+        else: tom.play(volume)
     elif (is_drum(x, y, z, drum_locations['floor_points'])):
         drumStr = 'f'
-        #floor.play(volume)
-        pm.play_floor(pm.current_velocity)
-
+        if(flag):pm.play_floor(pm.current_velocity)
+        else: floor.play(volume)
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
         drumStr = 'r'
-        #ride.play(volume)
-        pm.play_ride(pm.current_velocity)
-    if (drumStr!='') and (isArduinoConnected): s1.write(drumStr.encode)
+        if (flag): pm.play_ride(pm.current_velocity)
+        else: ride.play(volume)
+
+    if (drumStr!='') and (pm.is_arduino_connected): pm.get_s1().write(drumStr.encode)
 
 
 
 def main():
     pm = play_midi.play_midi()
+    #pm here choose if connect midi!
+    midi_flag=False
+    pm.set_midi_flag(midi_flag)
+
     debug = True
     record = False  #change to true if working with records
     center = deque(maxlen = 2)
@@ -158,11 +167,10 @@ def main():
     vs.setUpdateBarFunc(graphicDrums.updateBar)
     time.sleep(1.0)
     cap,s,s2=graphicDrums.createTrackbar()
-    isArduinoConnected=0 #choose if arduino is in use
 
-    if(isArduinoConnected):
-        s1 = serial.Serial('COM3', 9600)
-        time.sleep(3)
+    isArduinoConnected=False #choose if arduino is in use
+    if(isArduinoConnected): pm.arduino_config(isArduinoConnected)
+
 
 
     while True:
@@ -211,7 +219,7 @@ def main():
             legStick.addPoint(center2[i][0], center2[i][1])
             if (frameCount > 4):
                 # distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                trackStick(pm,legStick, drum_locations,isArduinoConnected)
+                trackStick(pm,legStick, drum_locations)
                 cv2.putText(color_frame, "{}mm".format(legStick.getZ()), (legStick.getX(), legStick.getY() ),
                             cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
@@ -228,7 +236,7 @@ def main():
                     if (frameCount > 4):
 
                         #distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        trackStick(pm,leftStick, drum_locations,isArduinoConnected)
+                        trackStick(pm,leftStick, drum_locations)
                         cv2.putText(color_frame, "{}mm".format(leftStick.getZ()), (leftStick.getX() ,leftStick.getY()- 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
@@ -237,7 +245,7 @@ def main():
                     rightStick.addPoint(center[i][0], center[i][1])
                     if (frameCount > 4):
                         #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        trackStick(pm,rightStick, drum_locations,isArduinoConnected)
+                        trackStick(pm,rightStick, drum_locations)
                         cv2.putText(color_frame, "{}mm".format(rightStick.getZ()), (rightStick.getX() ,rightStick.getY() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
@@ -248,13 +256,13 @@ def main():
                     leftStick.addPoint(center[i][0], center[i][1])
                     #distance = vs.get_distance(leftStick.getX(), leftStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(pm,leftStick, drum_locations,isArduinoConnected)
+                        trackStick(pm,leftStick, drum_locations)
 
                 else:
                     rightStick.addPoint(center[i][0], center[i][1])
                     #distance = vs.get_distance(rightStick.getX(), rightStick.getY(), raw_depth_frame)
                     if (frameCount > 4):
-                        trackStick(pm,rightStick, drum_locations,isArduinoConnected)
+                        trackStick(pm,rightStick, drum_locations)
 
 
 

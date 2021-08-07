@@ -1,15 +1,18 @@
 import time
 import rtmidi
-
+import serial
+import time
 
 
 class play_midi:
     def __init__(self):
+        self.is_midi = False
         self.midiout = rtmidi.MidiOut()
         self.time_sleep=0.05
         self.def_velocity=80
         available_ports = self.midiout.get_ports()
         self.current_velocity=80
+        self.is_arduino_connected=False
         # here we're printing the ports to check that we see the one that loopMidi created.
         # In the list we should see a port called "loopMIDI port".
         print(available_ports)
@@ -19,6 +22,24 @@ class play_midi:
             self.midiout.open_port(2)
         else:
             self.midiout.open_virtual_port("My virtual output")
+
+    def arduino_config(self, flag):
+        self.is_arduino_connected = flag
+        if (self.is_arduino_connected):
+            self.s1 = serial.Serial('COM3', 9600)
+            time.sleep(3)
+            return self.s1
+
+    def get_is_arduino_connected(self):
+        return self.is_arduino_connected
+
+    def get_s1(self):
+        return self.s1
+
+    def set_midi_flag(self,flag):
+        self.is_midi=flag
+    def get_midi_flag(self):
+        return self.is_midi
 
     def set_current_velocity(self,current_val):
         self.current_velocity=min(current_val,127)
