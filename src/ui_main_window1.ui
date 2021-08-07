@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="start_bt">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>520</y>
+      <x>210</x>
+      <y>530</y>
       <width>331</width>
       <height>23</height>
      </rect>
@@ -30,8 +30,8 @@
    <widget class="QSlider" name="songVolumeSlider">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>520</y>
+      <x>20</x>
+      <y>530</y>
       <width>160</width>
       <height>22</height>
      </rect>
@@ -41,6 +41,45 @@
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>500</y>
+      <width>1331</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="left_bt">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>530</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="right_bt">
+    <property name="geometry">
+     <rect>
+      <x>1000</x>
+      <y>530</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="stream2">

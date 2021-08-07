@@ -9,7 +9,7 @@ Last edited: 21 Feb 2018
 import sys
 
 # import some PyQt5 modules
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog ,QSlider
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog ,QSlider, QCommonStyle, QStyle
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QPixmap
@@ -48,6 +48,8 @@ class MainWindow(QMainWindow):
         self.ui.actionCalibrate_Leg.triggered.connect(self.iot.vs.calibrate_leg)
         self.ui.actionSave_Calibration.triggered.connect(self.iot.vs.save_calibration)
         self.ui.actionFinish_Sticks_Calibration.triggered.connect(self.iot.vs.finish_calibrate)
+        self.ui.left_bt.setIcon(self.style().standardIcon(QStyle.SP_ArrowLeft))
+        self.ui.right_bt.setIcon(self.style().standardIcon(QStyle.SP_ArrowRight))
 
 
     def init_iot_drums(self):
