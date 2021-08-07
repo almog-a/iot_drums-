@@ -1,7 +1,7 @@
 from collections import deque
 import os
 import numpy as np
-import src.realsense_depth as rs
+import realsense_depth as rs
 
 class Stick:
     def __init__(self, name,vs ,sensitivity = 7):

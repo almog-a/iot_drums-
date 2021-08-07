@@ -5,8 +5,8 @@ import time
 
 
 class play_midi:
-    def __init__(self):
-        self.is_midi = False
+    def __init__(self, is_midi):
+        self.is_midi = is_midi
         self.midiout = rtmidi.MidiOut()
         self.time_sleep=0.05
         self.def_velocity=80
@@ -18,10 +18,11 @@ class play_midi:
         print(available_ports)
 
          #Attempt to open the port
-        if available_ports:
-            self.midiout.open_port(2)
-        else:
-            self.midiout.open_virtual_port("My virtual output")
+        if self.is_midi:
+            if available_ports:
+                self.midiout.open_port(2)
+            else:
+                self.midiout.open_virtual_port("My virtual output")
 
     def arduino_config(self, flag):
         self.is_arduino_connected = flag
