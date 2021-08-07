@@ -45,30 +45,36 @@ class MainWindow(QMainWindow):
         self.ui.actionPlay_Song.triggered.connect(self.playSong)
         self.ui.actionCalibrate.triggered.connect(self.iot.vs.calibrate_sticks)
         self.ui.songVolumeSlider.valueChanged[int].connect(self.changeVolume)
+        #self.ui.start_bt.setIcon(self.style().standardIcon(QStyle.SP_MediaVolume))
         self.ui.actionCalibrate_Leg.triggered.connect(self.iot.vs.calibrate_leg)
         self.ui.actionSave_Calibration.triggered.connect(self.iot.vs.save_calibration)
         self.ui.actionFinish_Sticks_Calibration.triggered.connect(self.iot.vs.finish_calibrate)
         self.ui.left_bt.setIcon(self.style().standardIcon(QStyle.SP_ArrowLeft))
         self.ui.right_bt.setIcon(self.style().standardIcon(QStyle.SP_ArrowRight))
+        self.ui.left_bt.clicked.connect(lambda: self.changeStream(-1))
+        self.ui.right_bt.clicked.connect(lambda:  self.changeStream(1))
 
 
     def init_iot_drums(self):
+        self.stream_num=0
         return iot.iot_drums()
 
     def changeVolume(self, value):
         self.player.setVolume(value)
 
+    def changeStream(self,x):
+        self.stream_num = (self.stream_num+x) % 3
 
     def putStream(self):
-        color_frame, res = self.iot.iteration()
+        color_frame, secondary_frames = self.iot.iteration()
         color_frame = cv2.cvtColor(color_frame, cv2.COLOR_BGR2RGB)
-        res = cv2.cvtColor(res, cv2.COLOR_BGR2RGB)
+        sec_frame = cv2.cvtColor(secondary_frames[self.stream_num], cv2.COLOR_BGR2RGB)
 
         height, width, channel = color_frame.shape
         step = channel * width
         # create QImage from image
         qImg_stream1 = QImage(color_frame.data, width, height, step, QImage.Format_RGB888)
-        qImg_stream2 = QImage(res.data, width, height, step, QImage.Format_RGB888)
+        qImg_stream2 = QImage(sec_frame.data, width, height, step, QImage.Format_RGB888)
         # show image in img_label
         self.ui.stream1.setPixmap(QPixmap.fromImage(qImg_stream1))
         self.ui.stream1.mousePressEvent = self.getPixel

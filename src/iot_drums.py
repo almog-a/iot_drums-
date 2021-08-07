@@ -239,7 +239,7 @@ class iot_drums:
         #key = cv2.waitKey(1) & 0xFF
         self.frameCount += 1
 
-        return color_frame, res
+        return color_frame, [res, res2, depth_frame]
 
         # if the 'Esc' key is pressed, quit
         #if vs.keyUI():
