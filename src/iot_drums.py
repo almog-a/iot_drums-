@@ -1,13 +1,13 @@
 from collections import deque
-from DrumSound import DrumSound
-from Stick import Stick
-from drums import Drums
+from src.DrumSound import DrumSound
+from src.Stick import Stick
+from src.drums import Drums
 import numpy as np
 import cv2
 import time
-import realsense_depth as rs
+import src.realsense_depth as rs
 import serial
-
+import midi_handling2 as play_midi
 from graphics import graphic_drums
 ##### taking care of imports
 #----------comment-----
@@ -26,7 +26,11 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 
 
 def calculateVolume(stick) -> int:
+
     stick_acceleration = stick.getStickAcceleration()
+    # print("stick acceleration")
+    # print(stick_acceleration)
+    midi_volume=0
     volume = 0
     delta=2000
     if stick_acceleration > 10000-delta:
@@ -39,7 +43,14 @@ def calculateVolume(stick) -> int:
         volume = 2
     elif stick_acceleration > 2000-delta:
         volume = 1
-    return volume
+
+    if(stick_acceleration>2000-delta):
+        midi_velocity=(stick_acceleration/10000)*127
+
+
+    else:
+        midi_velocity=0
+    return volume,midi_velocity
 
 
 def define_locations():
@@ -49,14 +60,15 @@ def define_locations():
     return dict(hihat_points=hihat_points, snare_points=snare_points, kick_points=kick_points)
 
 
-def trackStick(stick, drum_locations,isArduinoConnected):
+def trackStick(pm,stick, drum_locations):
 
     stick.setMin(min(stick.getMin(), stick.getY()))
     if (len(stick.getPoints()) == 4):
         yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]  #last-current
         if (stick.getIsGoingDown() and yDirection < -stick.sensitivity):
-            volume = calculateVolume(stick)
-            playDrumByPosition(stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations,isArduinoConnected)
+            volume,midi_velocity = calculateVolume(stick)
+            pm.set_current_velocity(midi_velocity)
+            playDrumByPosition(pm,stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
         if np.abs(yDirection) > stick.sensitivity and yDirection >= 0:
@@ -76,7 +88,8 @@ def is_drum(x,y,z,points):
     #if (x < right_x) and (x > left_x) and (y < up_y+30) and (y > down_y-55) and (z < far_z) and (z > close_z):
         #return True
     if (x < right_x) and (x > left_x) and (y < up_y + 30) and (y > down_y - 55):
-        #print(x,y)
+        print(x,y)
+        return True
         if (z < far_z) and (z > close_z):
             return True
         else:
@@ -86,38 +99,51 @@ def is_drum(x,y,z,points):
 
 
 
-def playDrumByPosition(x,y,z,volume,drum_locations,isArduinoConnected=0):
+def playDrumByPosition(pm,x,y,z,volume,drum_locations):
+
     drumStr = ''
+    flag=pm.get_midi_flag()
 
     if(is_drum(x,y,z,drum_locations['snare_points'])):
-        drumStr='snare@'
-        snare.play(volume)
+        drumStr='s'
+        if (flag): pm.play_snare(pm.current_velocity)
+        else:
+            snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
-        drumStr = 'kick@'
-        kick.play(volume)
+        drumStr = 'k'
+        if (flag):pm.play_kick(pm.current_velocity)
+        else: kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
-        drumStr = 'hihat@'
-        hihat.play(volume)
+        drumStr = 'h'
 
+        if (flag): pm.play_hihate(pm.current_velocity)
+        else: hihat.play(volume)
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
-        drumStr = 'tom@'
-        tom.play(volume)
+        drumStr = 't'
 
+        if(flag): pm.play_tom(pm.current_velocity)
+        else: tom.play(volume)
     elif (is_drum(x, y, z, drum_locations['floor_points'])):
-        drumStr = 'floor@'
-        floor.play(volume)
-
+        drumStr = 'f'
+        if(flag):pm.play_floor(pm.current_velocity)
+        else: floor.play(volume)
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
-        drumStr = 'ride@'
-        ride.play(volume)
-    if (drumStr!='') and (isArduinoConnected): s1.write(drumStr.encode)
+        drumStr = 'r'
+        if (flag): pm.play_ride(pm.current_velocity)
+        else: ride.play(volume)
+
+    if (drumStr!='') and (pm.is_arduino_connected): pm.get_s1().write(drumStr.encode)
+
 
 
 class iot_drums:
 
     def __init__(self):
+        self.pm = play_midi.play_midi(False)
+        # pm here choose if connect midi!
+
         self.debug = True
-        self.record = True  #change to true if working with records
+        self.record = False  #change to true if working with records
         self.center = deque(maxlen = 2)
         self.center2 = deque(maxlen=1)
 
@@ -141,9 +167,12 @@ class iot_drums:
         self.vs.setUpdateBarFunc(self.graphicDrums.updateBar)
         time.sleep(1.0)
         cap,s,s2=self.graphicDrums.createTrackbar()
-        self.isArduinoConnected=0 #choose if arduino is in use
 
-        if(self.isArduinoConnected):
+        isArduinoConnected = False  # choose if arduino is in use
+        if isArduinoConnected:
+            self.pm.arduino_config(isArduinoConnected)
+
+        if isArduinoConnected:
             s1 = serial.Serial('COM3', 9600)
             time.sleep(3)
 
@@ -168,6 +197,7 @@ class iot_drums:
         numSticks = min(len(cnts), 2)
         numSticks2 = min(len(cnts2), 1)
 
+
         for i in range(numSticks):
             ((x, y), radius) = cv2.minEnclosingCircle(cnts[i]) #find a circle to enclose cnts[i]
             if (radius > 4):
@@ -185,7 +215,7 @@ class iot_drums:
             self.legStick.addPoint(self.center2[i][0], self.center2[i][1])
             if (self.frameCount > 4):
                 # distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                trackStick(self.legStick, self.drum_locations,self.isArduinoConnected)
+                trackStick(self.pm,self.legStick, self.drum_locations)
                 cv2.putText(color_frame, "{}mm".format(self.legStick.getZ()), (self.legStick.getX(), self.legStick.getY() ),
                             cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
@@ -202,7 +232,7 @@ class iot_drums:
                     if (self.frameCount > 4):
 
                         #distance = vs.get_distance(leftStick.getX(), leftStick.getY(),raw_depth_frame)
-                        trackStick(self.leftStick, self.drum_locations,self.isArduinoConnected)
+                        trackStick(self.pm,self.leftStick, self.drum_locations)
                         cv2.putText(color_frame, "{}mm".format(self.leftStick.getZ()), (self.leftStick.getX() ,self.leftStick.getY()- 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 else:
@@ -211,7 +241,7 @@ class iot_drums:
                     self.rightStick.addPoint(self.center[i][0], self.center[i][1])
                     if (self.frameCount > 4):
                         #distance=vs.get_distance(rightStick.getX(), rightStick.getY(),raw_depth_frame)
-                        trackStick(self.rightStick, self.drum_locations,self.isArduinoConnected)
+                        trackStick(self.pm,self.rightStick, self.drum_locations)
                         cv2.putText(color_frame, "{}mm".format(self.rightStick.getZ()), (self.rightStick.getX() ,self.rightStick.getY() - 20), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
             # Only one stick - split screen in half
@@ -222,14 +252,13 @@ class iot_drums:
                     self.leftStick.addPoint(self.center[i][0], self.center[i][1])
                     #distance = vs.get_distance(leftStick.getX(), leftStick.getY(), raw_depth_frame)
                     if (self.frameCount > 4):
-                        trackStick(self.leftStick, self.drum_locations,self.isArduinoConnected)
+                        trackStick(self.pm,self.leftStick, self.drum_locations)
 
                 else:
                     self.rightStick.addPoint(self.center[i][0], self.center[i][1])
                     #distance = vs.get_distance(rightStick.getX(), rightStick.getY(), raw_depth_frame)
                     if (self.frameCount > 4):
-                        trackStick(self.rightStick, self.drum_locations,self.isArduinoConnected)
-
+                        trackStick(self.pm,self.rightStick, self.drum_locations)
 
 
         self.graphicDrums.locate_drums_in_frame(color_frame)

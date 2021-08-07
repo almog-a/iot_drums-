@@ -17,7 +17,7 @@
    <widget class="QPushButton" name="start_bt">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>240</x>
       <y>530</y>
       <width>331</width>
       <height>23</height>
@@ -30,7 +30,7 @@
    <widget class="QSlider" name="songVolumeSlider">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>50</x>
       <y>530</y>
       <width>160</width>
       <height>22</height>
@@ -80,6 +80,48 @@
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="bt_vol_icon">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>530</y>
+      <width>21</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_MIDI">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>530</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>MIDI</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_Arduino">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>530</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Arduino</string>
     </property>
    </widget>
    <widget class="QLabel" name="stream2">
