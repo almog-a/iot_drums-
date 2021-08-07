@@ -74,6 +74,7 @@ class MainWindow(QMainWindow):
 
     def init_iot_drums(self):
         self.stream_num=0
+        self.streams_name = ["Sticks Stream", "Leg Stream", "Depth Stream"]
         return iot.iot_drums()
 
     def changeVolume(self, value):
@@ -81,6 +82,8 @@ class MainWindow(QMainWindow):
 
     def changeStream(self,x):
         self.stream_num = (self.stream_num+x) % 3
+        self.ui.stream_label.setText(self.streams_name[self.stream_num])
+
 
     def putStream(self):
         color_frame, secondary_frames = self.iot.iteration()
