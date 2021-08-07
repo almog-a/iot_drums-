@@ -140,11 +140,11 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
 class iot_drums:
 
     def __init__(self):
-        self.pm = play_midi.play_midi(True)
+        self.pm = play_midi.play_midi(False)
         # pm here choose if connect midi!
 
         self.debug = True
-        self.record = False  #change to true if working with records
+        self.record = True  #change to true if working with records
         self.center = deque(maxlen = 2)
         self.center2 = deque(maxlen=1)
 
@@ -161,6 +161,8 @@ class iot_drums:
         self.legStick = Stick("leg",self.vs, sensitivity=5)
 
         self.drums = Drums()
+        self.kick_cord1 = self.drums.kick_points[0] #cordinate for kick mask
+        self.kick_cord2 = self.drums.kick_points[1]
         #dictionary with drum boundaries
         #drum_locations = define_locations()
         self.drum_locations = self.drums.get_locations()
@@ -187,6 +189,15 @@ class iot_drums:
          #important !!! to return it to code
         # Mask the image so the result is just the drum stick tips
         mask, res, mask2, res2 = self.vs.find_color(color_frame)
+
+        #kick mask, take out everthing that not in the kick drum area
+        mask_kick=np.zeros_like(mask2)
+        kick_th = 25
+        mask_kick[self.kick_cord1[1]-kick_th:, self.kick_cord1[0]-kick_th:self.kick_cord2[0]+kick_th] = mask2[self.kick_cord1[1]-kick_th:, self.kick_cord1[0]-kick_th:self.kick_cord2[0]+kick_th]
+
+        mask2 = mask_kick
+        res2 = cv2.bitwise_and(res2, res2, mask=mask2)
+
         # Find contours in the mask
         cnts = self.vs.find_cnt(mask)
         cnts2 = self.vs.find_cnt(mask2)
