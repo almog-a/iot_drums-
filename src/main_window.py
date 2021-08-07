@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle("Air Drums")
 
         # create a timer
         self.timer = QTimer()
@@ -54,6 +55,21 @@ class MainWindow(QMainWindow):
         self.ui.right_bt.setIcon(self.style().standardIcon(QStyle.SP_ArrowRight))
         self.ui.left_bt.clicked.connect(lambda: self.changeStream(-1))
         self.ui.right_bt.clicked.connect(lambda:  self.changeStream(1))
+        self.ui.checkBox_Arduino.stateChanged.connect(lambda:  self.set_Arduino(self.ui.checkBox_Arduino.isChecked()))
+        self.ui.checkBox_MIDI.stateChanged.connect(lambda: self.set_MIDI(self.ui.checkBox_MIDI.isChecked()))
+
+    def set_MIDI(self, MIDI_state):
+        self.iot.pm.is_midi = MIDI_state
+        if MIDI_state:
+            self.iot.pm.open_port()
+        else:
+            self.iot.pm.close_port()
+
+    def set_Arduino(self, Arduino_state):
+        if Arduino_state:
+            self.iot.pm.arduino_config(Arduino_state)
+        else:
+            self.iot.pm.close_arduino()
 
 
     def init_iot_drums(self):
