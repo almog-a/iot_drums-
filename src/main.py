@@ -26,7 +26,10 @@ backSub = cv2.createBackgroundSubtractorKNN(detectShadows=False)
 
 
 def calculateVolume(stick) -> int:
+
     stick_acceleration = stick.getStickAcceleration()
+    print("stick acceleration")
+    print(stick_acceleration)
     volume = 0
     delta=2000
     if stick_acceleration > 10000-delta:
@@ -39,7 +42,11 @@ def calculateVolume(stick) -> int:
         volume = 2
     elif stick_acceleration > 2000-delta:
         volume = 1
-    return volume
+    if(stick_acceleration>2000-delta):
+        midi_velocity=(stick_acceleration/10000)*127
+    else:
+        midi_velocity=0
+    return volume,midi_velocity
 
 
 def define_locations():
@@ -55,7 +62,8 @@ def trackStick(pm,stick, drum_locations,isArduinoConnected):
     if (len(stick.getPoints()) == 4):
         yDirection = stick.getPoints()[3][1] - stick.getPoints()[0][1]  #last-current
         if (stick.getIsGoingDown() and yDirection < -stick.sensitivity):
-            volume = calculateVolume(stick)
+            volume,midi_velocity = calculateVolume(stick)
+            pm.set_current_velocity(midi_velocity)
             playDrumByPosition(pm,stick.getX(),stick.getY(),stick.getZ(),volume,drum_locations,isArduinoConnected)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
@@ -89,31 +97,32 @@ def is_drum(x,y,z,points):
 def playDrumByPosition(pm,x,y,z,volume,drum_locations,isArduinoConnected=0):
     drumStr = ''
 
+
     if(is_drum(x,y,z,drum_locations['snare_points'])):
         drumStr='s'
-        pm.play_snare()
+        pm.play_snare(pm.current_velocity)
         #snare.play(volume)
     elif (is_drum(x, y,z, drum_locations['kick_points'])):
         drumStr = 'k'
-        pm.play_kick()
+        pm.play_kick(pm.current_velocity)
         #kick.play(volume)
     elif (is_drum(x, y, z, drum_locations['hihat_points'])):
         drumStr = 'h'
         #hihat.play(volume)
-        pm.play_hihate()
+        pm.play_hihate(pm.current_velocity)
     elif (is_drum(x, y, z, drum_locations['tom_points'])):
         drumStr = 't'
         #tom.play(volume)
-        pm.play_tom()
+        pm.play_tom(pm.current_velocity)
     elif (is_drum(x, y, z, drum_locations['floor_points'])):
         drumStr = 'f'
         #floor.play(volume)
-        pm.play_floor()
+        pm.play_floor(pm.current_velocity)
 
     elif (is_drum(x, y, z, drum_locations['ride_points'])):
         drumStr = 'r'
         #ride.play(volume)
-        pm.play_ride()
+        pm.play_ride(pm.current_velocity)
     if (drumStr!='') and (isArduinoConnected): s1.write(drumStr.encode)
 
 
