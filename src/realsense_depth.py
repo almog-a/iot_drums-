@@ -25,6 +25,12 @@ class DepthCamera:
         self.calibrate_points = []  # will contain calibration points.
         self.color_frame = []
         self.updatebarFunc = None
+
+
+        #sensor = self.pipeline.get_active_profile().get_device().query_sensors()[1]
+        #sensor.set_option(rs.option.saturation,100)
+
+
         if not run_record:
         # Get device product line for setting a supporting resolution
             pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
@@ -58,10 +64,6 @@ class DepthCamera:
             else:
                 break
 
-
-
-
-
     def get_frame(self):
         frames = self.pipeline.wait_for_frames()
         raw_depth_frame = frames.get_depth_frame()
@@ -93,26 +95,19 @@ class DepthCamera:
                 if key == ord(" "):
                     break
         elif key==ord("s"): #save calibration to file
-            files_calibration.set_calibration_to_file("1_color_calibration.txt",self.objLower,self.objUpper)
-            files_calibration.set_calibration_to_file("2_color_calibration.txt",self.objLower_second,self.objUpper_second)
+            self.save_calibration()
 
         elif key == ord("c"): #calibrate color
-            self.calibrate_points = []
-            self.calibrate_color = True #starting the calibrating process
-            self.calibrate_type = "c"
+            self.calibrate_sticks()
 
         elif key == ord("x"):  # calibrate color
-            self.calibrate_points = []
-            self.calibrate_color = True  # starting the calibrating process
-            self.calibrate_type = "x"
-
+            self.calibrate_leg()
 
         elif key == ord("f"):  # finish calibrate color
-            self.calibrate_color = False
-            self.calibrate_type = "n"
-            self.calibrate_points = []  # initializing points for next calibration
+            self.finish_calibrate()
 
         return flag
+
 
 
     def get_distance(self,x,y,depth_frame):
@@ -193,22 +188,39 @@ class DepthCamera:
 
     def mouseRGB(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:  # checks mouse left button down condition
-            #colorsB = self.color_frame[y, x, 0]
-            #colorsG = self.color_frame[y, x, 1]
-            #colorsR = self.color_frame[y, x, 2]
-            colors = self.color_frame[y, x]
-            hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
-            if self.calibrate_color:
-                self.calibrateColor(hsv_color)
-                self.updatebarFunc()
+            self.calibrate_callback(x,y)
 
+    def calibrate_callback(self,x,y):
+        colors = self.color_frame[y, x]
+        hsv_color = np.squeeze(cv2.cvtColor(np.uint8([[colors]]), cv2.COLOR_BGR2HSV))
+        if self.calibrate_color:
+            self.calibrateColor(hsv_color)
+            self.updatebarFunc()
 
-            print("HSV Format: ", hsv_color)
-            print("BGR Format: ", colors)
-            print("Coordinates of pixel: X: ", x, "Y: ", y)
-
+        print("HSV Format: ", hsv_color)
+        print("BGR Format: ", colors)
+        print("Coordinates of pixel: X: ", x, "Y: ", y)
 
     def setUpdateBarFunc(self, func_to_save):
         if(self.updatebarFunc != None):
             raise Exception("updateBar for graphic class is already set")
         self.updatebarFunc = func_to_save
+
+    def calibrate_sticks(self):
+        self.calibrate_points = []
+        self.calibrate_color = True  # starting the calibrating process
+        self.calibrate_type = "c"
+
+    def finish_calibrate(self):
+        self.calibrate_color = False
+        self.calibrate_type = "n"
+        self.calibrate_points = []  # initializing points for next calibration
+
+    def calibrate_leg(self):
+        self.calibrate_points = []
+        self.calibrate_color = True  # starting the calibrating process
+        self.calibrate_type = "x"
+
+    def save_calibration(self):
+        files_calibration.set_calibration_to_file("1_color_calibration.txt", self.objLower, self.objUpper)
+        files_calibration.set_calibration_to_file("2_color_calibration.txt", self.objLower_second, self.objUpper_second)
