@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1728</width>
-    <height>612</height>
+    <width>1737</width>
+    <height>619</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="start_bt">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>530</y>
+      <x>270</x>
+      <y>550</y>
       <width>331</width>
       <height>23</height>
      </rect>
@@ -31,7 +31,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>530</y>
+      <y>550</y>
       <width>160</width>
       <height>22</height>
      </rect>
@@ -48,7 +48,7 @@
      <rect>
       <x>0</x>
       <y>500</y>
-      <width>1331</width>
+      <width>1721</width>
       <height>20</height>
      </rect>
     </property>
@@ -59,8 +59,8 @@
    <widget class="QPushButton" name="left_bt">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>530</y>
+      <x>1200</x>
+      <y>550</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -72,8 +72,8 @@
    <widget class="QPushButton" name="right_bt">
     <property name="geometry">
      <rect>
-      <x>1000</x>
-      <y>530</y>
+      <x>1310</x>
+      <y>550</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -86,7 +86,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>530</y>
+      <y>550</y>
       <width>21</width>
       <height>23</height>
      </rect>
@@ -102,7 +102,7 @@
     <property name="geometry">
      <rect>
       <x>770</x>
-      <y>530</y>
+      <y>550</y>
       <width>70</width>
       <height>17</height>
      </rect>
@@ -115,7 +115,7 @@
     <property name="geometry">
      <rect>
       <x>680</x>
-      <y>530</y>
+      <y>550</y>
       <width>70</width>
       <height>17</height>
      </rect>
@@ -150,13 +150,65 @@
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QLabel" name="stream_label">
+    <property name="geometry">
+     <rect>
+      <x>1240</x>
+      <y>520</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Sticks Stream</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="stream_label_2">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>520</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Colore Stream</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1728</width>
+     <width>1737</width>
      <height>21</height>
     </rect>
    </property>
