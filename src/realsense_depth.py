@@ -2,6 +2,8 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import imutils
+import time
+import serial
 import files_calibration
 #--
 class DepthCamera:
@@ -41,6 +43,7 @@ class DepthCamera:
             # Change this parameters according to the recorded bag file resolution
             self.config.enable_stream(rs.stream.depth, rs.format.z16, 30)
             self.config.enable_stream(rs.stream.color, rs.format.rgb8, 30)
+
 
     def startStream(self):
         # Start streaming
