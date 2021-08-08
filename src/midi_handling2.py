@@ -28,7 +28,7 @@ class play_midi:
             #     self.midiout.open_virtual_port("My virtual output")
 
     def set_isDepthOn(self,flag):
-        self.isDepthOn=flag
+        self.isDepthOn = flag
 
     def get_isDepthOn(self):
         return self.isDepthOn

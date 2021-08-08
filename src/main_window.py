@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
         self.ui.right_bt.clicked.connect(lambda:  self.changeStream(1))
         self.ui.checkBox_Arduino.stateChanged.connect(lambda:  self.set_Arduino(self.ui.checkBox_Arduino.isChecked()))
         self.ui.checkBox_MIDI.stateChanged.connect(lambda: self.set_MIDI(self.ui.checkBox_MIDI.isChecked()))
+        self.ui.checkBox_Depth.stateChanged.connect(lambda: self.iot.pm.set_isDepthOn(self.ui.checkBox_Depth.isChecked()))
 
     def set_MIDI(self, MIDI_state):
         self.iot.pm.is_midi = MIDI_state

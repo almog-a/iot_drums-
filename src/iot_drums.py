@@ -175,8 +175,6 @@ class iot_drums:
         if isArduinoConnected:
             self.pm.arduino_config(isArduinoConnected)
 
-
-
     def iteration(self):
         self.graphicDrums.controlBar()
         # Read in 1 frame at a time and flip the image
