@@ -106,29 +106,29 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
     flag=pm.get_midi_flag()
 
     if(is_drum(pm,x,y,z,drum_locations['snare_points'])):
-        drumStr='snare@'
+        drumStr='s'
         if (flag): pm.play_snare(pm.current_velocity)
         else:
             snare.play(volume)
     elif (is_drum(pm,x, y,z, drum_locations['kick_points'])):
-        drumStr = 'kick@'
+        drumStr = 'k'
         if (flag):pm.play_kick(pm.current_velocity)
         else: kick.play(volume)
     elif (is_drum(pm,x, y, z, drum_locations['hihat_points'])):
-        drumStr = 'hihat@'
+        drumStr = 'h'
 
         if (flag): pm.play_hihate(pm.current_velocity)
         else: hihat.play(volume)
     elif (is_drum(pm,x, y, z, drum_locations['tom_points'])):
-        drumStr = 'tom@'
+        drumStr = 't'
         if(flag): pm.play_tom(pm.current_velocity)
         else: tom.play(volume)
     elif (is_drum(pm,x, y, z, drum_locations['floor_points'])):
-        drumStr = 'floor@'
+        drumStr = 'f'
         if(flag):pm.play_floor(pm.current_velocity)
         else: floor.play(volume)
     elif (is_drum(pm,x, y, z, drum_locations['ride_points'])):
-        drumStr = 'ride@'
+        drumStr = 'r'
         if (flag): pm.play_ride(pm.current_velocity)
         else: ride.play(volume)
 
