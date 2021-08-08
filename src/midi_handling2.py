@@ -5,7 +5,7 @@ import time
 
 
 class play_midi:
-    def __init__(self, is_midi):
+    def __init__(self, is_midi=False):
         self.is_midi = is_midi
         self.midiout = rtmidi.MidiOut()
         self.time_sleep=0.05
@@ -13,6 +13,8 @@ class play_midi:
         available_ports = self.midiout.get_ports()
         self.current_velocity=80
         self.is_arduino_connected=False
+        self.port = []
+        self.isDepthOn=False
         # here we're printing the ports to check that we see the one that loopMidi created.
         # In the list we should see a port called "loopMIDI port".
         print(available_ports)
@@ -25,15 +27,21 @@ class play_midi:
             # else:
             #     self.midiout.open_virtual_port("My virtual output")
 
+    def set_isDepthOn(self,flag):
+        self.isDepthOn=flag
+
+    def get_isDepthOn(self):
+        return self.isDepthOn
+
     def open_port(self):
         available_ports = self.midiout.get_ports()
         if available_ports:
-            self.midiout.open_port(2)
+            self.port = self.midiout.open_port(2)
         else:
-            self.midiout.open_virtual_port("My virtual output")
+            self.port = self.midiout.open_virtual_port("My virtual output")
 
     def close_port(self):
-        self.midiout.close_port()
+        self.port.close_port()
 
 
     def arduino_config(self, flag):
@@ -68,8 +76,8 @@ class play_midi:
         if(velocity==0): return
         print("current velocity")
         print(self.current_velocity)
-        note_on = [0x90, 60, velocity]
-        note_off = [0x80, 60, 0]
+        note_on = [0x90, 42, velocity]
+        note_off = [0x80, 42, 0]
         self.midiout.send_message(note_on)
         time.sleep(self.time_sleep)
         self.midiout.send_message(note_off)
@@ -106,8 +114,9 @@ class play_midi:
 
     def play_snare(self,velocity=100):
         if (velocity == 0): return
+        velocity=max(velocity-40,25)
         print("current velocity")
-        print(self.current_velocity)
+        print(self.current_velocity-20)
         note_on = [0x90, 38, velocity]
         note_off = [0x80, 38, 0]
         self.midiout.send_message(note_on)
