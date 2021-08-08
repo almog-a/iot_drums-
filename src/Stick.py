@@ -17,13 +17,13 @@ class Stick:
         self.points.appendleft((0, 0,0))
         self.points.appendleft((0, 0,0))
         self.points.appendleft((0, 0,0))
-        self.isSound=True
+
 
     def setRawDepthFrame(self,raw_depth_frame):
         self.raw_depth_frame=raw_depth_frame
 
-    def isCloseEnough(self):
-        return self.isSound
+    # def isCloseEnough(self):
+    #     return self.isSound
 
     def getName(self):
         return self.name
@@ -69,8 +69,8 @@ class Stick:
         cur_point=(x,y)
 
         dist=np.sqrt((cur_point[0] - prev_point[0]) ** 2 + (cur_point[1] - prev_point[1]) ** 2)
-        if (dist>45):self.isSound=False
-        else: self.isSound=True
+        #if (dist>45):self.isSound=False
+        #else: self.isSound=True
 
     def getX(self):
         return self.points[0][0]
@@ -90,6 +90,7 @@ class Stick:
         return (vector_x**2 + vector_y**2 + vector_z**2)**(0.5)
 
     #returns acceleration pixel/s^2
+
     def getStickAcceleration(self):
         fps = 30 #frames per second
         curr_velocity = self.getStickVelocity(end_point=self.points[0],start_point=self.points[1])

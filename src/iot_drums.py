@@ -44,12 +44,12 @@ def calculateVolume(stick) -> int:
     elif stick_acceleration > 2000-delta:
         volume = 1
 
-    if(stick_acceleration>2000-delta):
-        midi_velocity=(stick_acceleration/5000)*127
+    print("stick acceleration")
+    print(stick_acceleration)
+    #if(stick_acceleration>2000-delta):
+    if(stick_acceleration<250)or(stick_acceleration>10000): midi_velocity=0
+    else: midi_velocity=min((stick_acceleration/7000)*127,127)
 
-
-    else:
-        midi_velocity=0
     return volume,midi_velocity
 
 
@@ -68,8 +68,8 @@ def trackStick(pm,stick, drum_locations):
         if (stick.getIsGoingDown() and yDirection < -stick.sensitivity):
             volume,midi_velocity = calculateVolume(stick)
             pm.set_current_velocity(midi_velocity)
-            if (stick.isCloseEnough()):
-                playDrumByPosition(pm, stick.getX(), stick.getY(), stick.getZ(), volume, drum_locations)
+            #if (stick.isCloseEnough()):
+            playDrumByPosition(pm, stick.getX(), stick.getY(), stick.getZ(), volume, drum_locations)
             stick.setMin(600)
             stick.updateIsGoingDown(False)
         if np.abs(yDirection) > stick.sensitivity and yDirection >= 0:
@@ -77,7 +77,7 @@ def trackStick(pm,stick, drum_locations):
     return
 
 
-def is_drum(x,y,z,points):
+def is_drum(pm,x,y,z,points):
     #return True
     left_x, down_y = points[0][0], points[0][1] #first point
     right_x,up_y=points[1][0],points[1][1] #second point
@@ -90,7 +90,7 @@ def is_drum(x,y,z,points):
         #return True
     if (x < right_x) and (x > left_x) and (y < up_y + 30) and (y > down_y - 55):
         print(x,y)
-        #return True
+        if(pm.get_isDepthOn()==False): return True
         if (z < far_z) and (z > close_z):
             return True
         else:
@@ -105,29 +105,29 @@ def playDrumByPosition(pm,x,y,z,volume,drum_locations):
     drumStr = ''
     flag=pm.get_midi_flag()
 
-    if(is_drum(x,y,z,drum_locations['snare_points'])):
+    if(is_drum(pm,x,y,z,drum_locations['snare_points'])):
         drumStr='snare@'
         if (flag): pm.play_snare(pm.current_velocity)
         else:
             snare.play(volume)
-    elif (is_drum(x, y,z, drum_locations['kick_points'])):
+    elif (is_drum(pm,x, y,z, drum_locations['kick_points'])):
         drumStr = 'kick@'
         if (flag):pm.play_kick(pm.current_velocity)
         else: kick.play(volume)
-    elif (is_drum(x, y, z, drum_locations['hihat_points'])):
+    elif (is_drum(pm,x, y, z, drum_locations['hihat_points'])):
         drumStr = 'hihat@'
 
         if (flag): pm.play_hihate(pm.current_velocity)
         else: hihat.play(volume)
-    elif (is_drum(x, y, z, drum_locations['tom_points'])):
+    elif (is_drum(pm,x, y, z, drum_locations['tom_points'])):
         drumStr = 'tom@'
         if(flag): pm.play_tom(pm.current_velocity)
         else: tom.play(volume)
-    elif (is_drum(x, y, z, drum_locations['floor_points'])):
+    elif (is_drum(pm,x, y, z, drum_locations['floor_points'])):
         drumStr = 'floor@'
         if(flag):pm.play_floor(pm.current_velocity)
         else: floor.play(volume)
-    elif (is_drum(x, y, z, drum_locations['ride_points'])):
+    elif (is_drum(pm,x, y, z, drum_locations['ride_points'])):
         drumStr = 'ride@'
         if (flag): pm.play_ride(pm.current_velocity)
         else: ride.play(volume)
