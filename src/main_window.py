@@ -9,7 +9,7 @@ Last edited: 21 Feb 2018
 import sys
 
 # import some PyQt5 modules
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog ,QSlider, QCommonStyle, QStyle
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog ,QSlider, QCommonStyle, QStyle, QDialog
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QImage
 from PyQt5.QtGui import QPixmap
@@ -20,7 +20,27 @@ from PyQt5 import QtMultimedia
 import cv2
 
 from ui_main_window1 import *
+from ui_opening_window import *
 import iot_drums as iot
+
+
+class OpeningWindow(QDialog):
+    # class constructor
+    def __init__(self):
+        # call QWidget constructor
+        super().__init__()
+        self.ui = Ui_Dialog()
+        self.ui.setupUi(self)
+        self.setWindowTitle("Air Drums")
+
+        self.ui.pushButton.clicked.connect(self.MoveToMainWindow)
+
+    def MoveToMainWindow(self):
+        mainWindow = MainWindow()
+        size = mainWindow.size()
+        widget.addWidget(mainWindow)
+        widget.setCurrentIndex(widget.currentIndex() + 1)
+        widget.resize(size)
 
 
 class MainWindow(QMainWindow):
@@ -152,7 +172,14 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     # create and show mainWindow
-    mainWindow = MainWindow()
-    mainWindow.show()
+    widget = QtWidgets.QStackedWidget()
+    #mainWindow = MainWindow()
+    openingWindow = OpeningWindow()
+    widget.addWidget(openingWindow)
+    #widget.addWidget(mainWindow)
+    widget.resize(openingWindow.size())
+    widget.show()
+
+    #mainWindow.show()
 
     sys.exit(app.exec_())
