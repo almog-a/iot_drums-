@@ -7,7 +7,6 @@ class graphic_drums:
 
     def __init__(self, vs:DepthCamera, drum_locations, is_debug = False):
         self.points_dict = drum_locations
-
         self.vs = vs
         self.is_debug = is_debug
         self.circles = []
@@ -138,9 +137,8 @@ class graphic_drums:
             #cv2.imshow("mask", mask)
             cv2.imshow("res Strem 2", res2)
             #cv2.imshow("mask", mask2)
-        for center,color in self.circles:
-            cv2.circle(color_frame, center, 10, color, 3)
-        self.circles.clear()
+
+
         #color_frame2=cv2.convertScaleAbs(color_frame, -2, 2)
         img=color_frame
         '''
@@ -154,6 +152,10 @@ class graphic_drums:
         cv2.imshow("Color Stream", color_frame)
         #cv2.imshow("Color Stream2", img)
 
+    def draw_sticks_circles(self, color_frame):#draw circles to sticks on color stream
+        for center,color in self.circles:
+            cv2.circle(color_frame, center, 10, color, 3)
+        self.circles.clear()
 
     def add_circle(self,center,color):
         self.circles.append((center, color))

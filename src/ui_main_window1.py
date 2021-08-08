@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1737, 631)
+        MainWindow.resize(1737, 642)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.start_bt = QtWidgets.QPushButton(self.centralwidget)
@@ -84,6 +84,9 @@ class Ui_MainWindow(object):
         self.checkBox_Depth = QtWidgets.QCheckBox(self.centralwidget)
         self.checkBox_Depth.setGeometry(QtCore.QRect(840, 550, 70, 17))
         self.checkBox_Depth.setObjectName("checkBox_Depth")
+        self.checkBox_circle_sticks = QtWidgets.QCheckBox(self.centralwidget)
+        self.checkBox_circle_sticks.setGeometry(QtCore.QRect(920, 550, 91, 17))
+        self.checkBox_circle_sticks.setObjectName("checkBox_circle_sticks")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1737, 21))
@@ -125,6 +128,7 @@ class Ui_MainWindow(object):
         self.stream_label.setText(_translate("MainWindow", "Sticks Stream"))
         self.stream_label_2.setText(_translate("MainWindow", "Colore Stream"))
         self.checkBox_Depth.setText(_translate("MainWindow", "Depth"))
+        self.checkBox_circle_sticks.setText(_translate("MainWindow", "Circle Sticks"))
         self.menuSet_Up.setTitle(_translate("MainWindow", "Set Up"))
         self.actionCalibrate.setText(_translate("MainWindow", "Calibrate Sticks"))
         self.actionCalibrate.setShortcut(_translate("MainWindow", "C"))

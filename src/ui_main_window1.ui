@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1737</width>
-    <height>631</height>
+    <height>642</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -213,6 +213,19 @@
     </property>
     <property name="text">
      <string>Depth</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_circle_sticks">
+    <property name="geometry">
+     <rect>
+      <x>920</x>
+      <y>550</y>
+      <width>91</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Circle Sticks</string>
     </property>
    </widget>
   </widget>

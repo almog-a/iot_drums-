@@ -152,6 +152,7 @@ class iot_drums:
         self.center.appendleft((0,0))
         self.center2.appendleft((0,0))
 
+        self.draw_sticks = False
         self.frameCount = 0
         file_name ='C:/Users/User/Documents/20210420_143134.bag'  #path to bag file
         self.vs = rs.DepthCamera(self.record, file_name)
@@ -174,6 +175,9 @@ class iot_drums:
         isArduinoConnected = False  # choose if arduino is in use
         if isArduinoConnected:
             self.pm.arduino_config(isArduinoConnected)
+
+    def setDrawSticks(self, flag):
+        self.draw_sticks = flag
 
     def iteration(self):
         self.graphicDrums.controlBar()
@@ -269,8 +273,10 @@ class iot_drums:
 
 
         self.graphicDrums.locate_drums_in_frame(color_frame)
-        self.graphicDrums.show_graphics(color_frame,depth_frame=depth_frame, res=res, mask=mask,res2=res2,mask2=mask2)
-        #graphicDrums.show_graphics(color_frame, depth_frame=depth_frame, res=res2, mask=mask2)
+        if self.draw_sticks:
+            self.graphicDrums.draw_sticks_circles(color_frame)
+        #self.graphicDrums.show_graphics(color_frame,depth_frame=depth_frame, res=res, mask=mask,res2=res2,mask2=mask2)
+
 
         #key = cv2.waitKey(1) & 0xFF
         self.frameCount += 1
