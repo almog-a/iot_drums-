@@ -227,3 +227,22 @@ class DepthCamera:
     def save_calibration(self):
         files_calibration.set_calibration_to_file("1_color_calibration.txt", self.objLower, self.objUpper)
         files_calibration.set_calibration_to_file("2_color_calibration.txt", self.objLower_second, self.objUpper_second)
+
+    def calibrate_sticks(self):
+        self.calibrate_points = []
+        self.calibrate_color = True  # starting the calibrating process
+        self.calibrate_type = "c"
+
+    def finish_calibrate(self):
+        self.calibrate_color = False
+        self.calibrate_type = "n"
+        self.calibrate_points = []  # initializing points for next calibration
+
+    def calibrate_leg(self):
+        self.calibrate_points = []
+        self.calibrate_color = True  # starting the calibrating process
+        self.calibrate_type = "x"
+
+    def save_calibration(self):
+        files_calibration.set_calibration_to_file("1_color_calibration.txt", self.objLower, self.objUpper)
+        files_calibration.set_calibration_to_file("2_color_calibration.txt", self.objLower_second, self.objUpper_second)
