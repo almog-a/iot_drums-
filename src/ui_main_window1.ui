@@ -155,8 +155,8 @@
      <rect>
       <x>1240</x>
       <y>520</y>
-      <width>131</width>
-      <height>20</height>
+      <width>151</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -199,7 +199,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Colore Stream</string>
+     <string>Color Stream</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_Depth">
